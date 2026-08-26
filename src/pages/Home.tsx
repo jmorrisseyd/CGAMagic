@@ -6,6 +6,7 @@ import {
   exportSet,
   importSet,
   listSets,
+  loadExampleSets,
 } from "../storage/sets";
 import type { TextMatchSet } from "../types";
 
@@ -17,10 +18,24 @@ export function Home() {
   const [leftLabel, setLeftLabel] = useState("French");
   const [rightLabel, setRightLabel] = useState("English");
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
 
   function refresh() {
     setSets(listSets());
+  }
+
+  function handleLoadExamples() {
+    const { added, skipped } = loadExampleSets();
+    refresh();
+    setError(null);
+    if (added === 0) {
+      setMessage("Example sets are already loaded.");
+    } else if (skipped === 0) {
+      setMessage(`Added ${added} example sets (Year 7/9/11 × French/Italian/Spanish).`);
+    } else {
+      setMessage(`Added ${added} new example sets — ${skipped} were already loaded.`);
+    }
   }
 
   function handleCreate(e: React.FormEvent) {
@@ -82,6 +97,12 @@ export function Home() {
           >
             Import from file
           </button>
+          <button
+            onClick={handleLoadExamples}
+            className="rounded-lg bg-white hover:bg-slate-50 border border-slate-300 font-medium px-5 py-2.5"
+          >
+            Load example sets
+          </button>
           <input
             ref={fileInput}
             type="file"
@@ -92,6 +113,7 @@ export function Home() {
         </div>
 
         {error && <p className="text-red-600 text-sm">{error}</p>}
+        {message && <p className="text-slate-500 text-sm">{message}</p>}
 
         {showCreate && (
           <form

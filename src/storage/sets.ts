@@ -1,3 +1,4 @@
+import { exampleSets } from "../data/exampleSets";
 import { makeId } from "../lib/id";
 import type { TextMatchSet } from "../types";
 
@@ -62,6 +63,38 @@ export function deleteSet(id: string): void {
 
 export function exportSet(set: TextMatchSet): string {
   return JSON.stringify(set, null, 2);
+}
+
+/**
+ * Seeds the built-in example sets (French/Italian/Spanish x Year 7/9/11)
+ * into storage. Skips any example whose title already exists, so it's
+ * safe to call more than once (e.g. clicking the button twice).
+ */
+export function loadExampleSets(): { added: number; skipped: number } {
+  const all = readAll();
+  const existingTitles = new Set(all.map((s) => s.title));
+  const now = Date.now();
+  const toAdd: TextMatchSet[] = [];
+  let skipped = 0;
+
+  for (const example of exampleSets) {
+    if (existingTitles.has(example.title)) {
+      skipped++;
+      continue;
+    }
+    toAdd.push({
+      id: makeId(),
+      title: example.title,
+      leftLabel: example.leftLabel,
+      rightLabel: example.rightLabel,
+      pairs: example.pairs.map((p) => ({ id: makeId(), left: p.left, right: p.right })),
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
+  if (toAdd.length > 0) writeAll([...all, ...toAdd]);
+  return { added: toAdd.length, skipped };
 }
 
 export function importSet(json: string): TextMatchSet {
