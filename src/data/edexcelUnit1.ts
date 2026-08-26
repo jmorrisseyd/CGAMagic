@@ -1,0 +1,143 @@
+// A Level Spanish vocab, transcribed from the department's own scanned
+// textbook page: Edexcel A Level Spanish, Unit 1, Tema 1 "La evolución de
+// la sociedad española", sections 1.1-1.3. Source:
+// "Textbook Scans/A Level Edexcel/Unit 1/Unit 1 vocab.pdf"
+//
+// Irregular first-person present forms are kept in brackets exactly as
+// printed in the textbook (e.g. "caer (caigo) bien") since that's part of
+// what students need to learn. Worth a proofread against the original scan
+// before relying on it for an assessment — this was transcribed, not OCR'd
+// verbatim.
+
+import type { ExampleSet } from "./exampleSets";
+
+const unit1_1: ExampleSet["pairs"] = [
+  { left: "los abuelos", right: "grandparents" },
+  { left: "alquilar", right: "to rent" },
+  { left: "caer (caigo) bien", right: "to like, to find pleasant" },
+  { left: "el/la cónyuge", right: "spouse" },
+  { left: "dar caprichos", right: "to give treats" },
+  { left: "echar una mano", right: "to give a hand" },
+  { left: "el/la empleado/a doméstico/a", right: "domestic help" },
+  { left: "estar casado", right: "to be married" },
+  { left: "estar (estoy) en los planes", right: "to be part of the plans" },
+  { left: "estar (estoy) separado", right: "to be separated" },
+  { left: "fuera de casa", right: "away from home" },
+  { left: "la guardería", right: "nursery" },
+  { left: "habituarse a", right: "to get used to" },
+  { left: "hacer (hago) los deberes", right: "to do one's homework" },
+  { left: "hacer (hago) (menos) caso", right: "to pay (less) attention" },
+  { left: "los hermanos", right: "siblings" },
+  { left: "el horario", right: "timetable" },
+  { left: "los ingresos", right: "income" },
+  { left: "el marido", right: "husband" },
+  { left: "el matrimonio", right: "marriage" },
+  { left: "el nacimiento", right: "birth" },
+  { left: "el/la novio/a", right: "boy/girlfriend" },
+  { left: "la pareja", right: "couple" },
+  { left: "el piso compartido", right: "shared flat" },
+  { left: "quedarse (con)", right: "to stay (with)" },
+  { left: "recoger (recojo) a alguien", right: "to pick up someone" },
+  { left: "separarse", right: "to be separated" },
+  { left: "las tareas de la casa", right: "household chores" },
+  { left: "tener (tengo) hijos", right: "to have children" },
+  { left: "tener (tengo) que acostumbrarse", right: "to have to get used to" },
+  { left: "tocarle a alguien", right: "to be someone's turn" },
+  { left: "el/la treintañero/a", right: "person in their thirties" },
+  { left: "vivir (con)", right: "to live (with)" },
+];
+
+const unit1_2: ExampleSet["pairs"] = [
+  { left: "la adopción", right: "adoption" },
+  { left: "el ayuntamiento", right: "town hall" },
+  { left: "una barrera milenaria", right: "a thousand-year-old barrier" },
+  { left: "la boda", right: "wedding" },
+  { left: "casar a alguien", right: "to marry someone" },
+  { left: "casarse", right: "to get married" },
+  { left: "Chueca", right: "gay-friendly district in Madrid" },
+  { left: "los derechos", right: "rights" },
+  { left: "el divorcio", right: "divorce" },
+  { left: "emigrar", right: "to emigrate" },
+  { left: "envejecer (envejezco)", right: "to age, to get old" },
+  { left: "la esposa", right: "wife" },
+  { left: "estar (estoy) enamorado de", right: "to be in love with" },
+  { left: "la fecundación in vitro", right: "IVF" },
+  { left: "la fecundidad", right: "fertility" },
+  { left: "la generación", right: "generation" },
+  { left: "la herencia", right: "inheritance" },
+  { left: "heterosexual", right: "heterosexual" },
+  { left: "el/la hijo/a único/a", right: "only child" },
+  { left: "el juzgado", right: "magistrate's court" },
+  { left: "lesbiana", right: "lesbian" },
+  { left: "la ley misma", right: "the law itself" },
+  { left: "matrimonial", right: "marital, matrimonial" },
+  { left: "el matrimonio del mismo sexo", right: "same-sex marriage" },
+  { left: "la militancia", right: "solidarity" },
+  { left: "la natalidad", right: "birth rate" },
+  { left: "la nupcialidad", right: "marriage rate (in statistics)" },
+  { left: "la orientación sexual", right: "sexual orientation" },
+  { left: "quedarse soltero", right: "to remain single" },
+  { left: "recién casado", right: "recently married" },
+  { left: "sentirse (me siento) solo", right: "to feel lonely" },
+  { left: "la tasa de natalidad/fecundidad", right: "birth/fertility rate" },
+  { left: "tener (tengo) derecho a", right: "to have the right to" },
+  { left: "tener (tengo) familia", right: "to have a family" },
+];
+
+const unit1_3: ExampleSet["pairs"] = [
+  { left: "acordarse (me acuerdo)", right: "to recall, to remember" },
+  { left: "la casa familiar", right: "family home" },
+  { left: "los celos", right: "jealousy" },
+  { left: "construir (construyo) su hogar", right: "to make one's home" },
+  { left: "la crisis", right: "(economic) recession" },
+  { left: "de mutuo acuerdo", right: "mutually agreed" },
+  { left: "el derecho", right: "right" },
+  { left: "el desequilibrio", right: "imbalance" },
+  { left: "la diferencia cultural", right: "cultural difference" },
+  { left: "discutir", right: "to argue" },
+  { left: "el entorno familiar", right: "family environment" },
+  { left: "la expectativa diferente", right: "different expectation" },
+  { left: "el fallecimiento", right: "death" },
+  { left: "los familiares", right: "relatives" },
+  { left: "la infidelidad", right: "unfaithfulness, infidelity" },
+  { left: "jubilarse", right: "to retire" },
+  { left: "jugar (juego) un papel", right: "to play a role" },
+  { left: "el nieto", right: "grandson" },
+  { left: "la nieta", right: "granddaughter" },
+  { left: "la nuera", right: "daughter-in-law" },
+  { left: "ocuparse (de)", right: "to take care (of)" },
+  { left: "los padres", right: "parents" },
+  { left: "el pañal", right: "nappy" },
+  { left: "la pareja", right: "partner" },
+  { left: "las relaciones familiares", right: "family relationships" },
+  { left: "separarse de mutuo acuerdo", right: "to separate by mutual agreement" },
+  { left: "soltero", right: "single" },
+  { left: "el suegro", right: "father-in-law" },
+  { left: "la suegra", right: "mother-in-law" },
+  { left: "transmitir valores familiares", right: "to pass on family values" },
+  { left: "vestirse (me visto) de blanco", right: "to dress in white" },
+  { left: "la vivienda", right: "housing" },
+  { left: "vivir juntos", right: "to live together" },
+  { left: "el yerno", right: "son-in-law" },
+];
+
+export const edexcelUnit1Sets: ExampleSet[] = [
+  {
+    title: "A Level Spanish (Edexcel Unit 1): 1.1 Diversidad en los modelos de familia",
+    leftLabel: "Spanish",
+    rightLabel: "English",
+    pairs: unit1_1,
+  },
+  {
+    title: "A Level Spanish (Edexcel Unit 1): 1.2 ¿Vivir juntos o casarse?",
+    leftLabel: "Spanish",
+    rightLabel: "English",
+    pairs: unit1_2,
+  },
+  {
+    title: "A Level Spanish (Edexcel Unit 1): 1.3 El casado casa quiere",
+    leftLabel: "Spanish",
+    rightLabel: "English",
+    pairs: unit1_3,
+  },
+];

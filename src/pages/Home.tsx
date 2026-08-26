@@ -6,6 +6,7 @@ import {
   exportSet,
   importSet,
   listSets,
+  loadEdexcelUnit1Sets,
   loadExampleSets,
 } from "../storage/sets";
 import type { TextMatchSet } from "../types";
@@ -25,16 +26,19 @@ export function Home() {
     setSets(listSets());
   }
 
-  function handleLoadExamples() {
-    const { added, skipped } = loadExampleSets();
+  function loadCollection(
+    loader: () => { added: number; skipped: number },
+    label: string,
+  ) {
+    const { added, skipped } = loader();
     refresh();
     setError(null);
     if (added === 0) {
-      setMessage("Example sets are already loaded.");
+      setMessage(`${label} are already loaded.`);
     } else if (skipped === 0) {
-      setMessage(`Added ${added} example sets (Year 7/9/11 × French/Italian/Spanish).`);
+      setMessage(`Added ${added} ${label}.`);
     } else {
-      setMessage(`Added ${added} new example sets — ${skipped} were already loaded.`);
+      setMessage(`Added ${added} new ${label} — ${skipped} were already loaded.`);
     }
   }
 
@@ -98,10 +102,20 @@ export function Home() {
             Import from file
           </button>
           <button
-            onClick={handleLoadExamples}
+            onClick={() =>
+              loadCollection(loadExampleSets, "example sets (Year 7/9/11 × French/Italian/Spanish)")
+            }
             className="rounded-lg bg-white hover:bg-slate-50 border border-slate-300 font-medium px-5 py-2.5"
           >
             Load example sets
+          </button>
+          <button
+            onClick={() =>
+              loadCollection(loadEdexcelUnit1Sets, "A Level Spanish sets (Edexcel Unit 1)")
+            }
+            className="rounded-lg bg-white hover:bg-slate-50 border border-slate-300 font-medium px-5 py-2.5"
+          >
+            Load A Level Spanish (Edexcel Unit 1)
           </button>
           <input
             ref={fileInput}

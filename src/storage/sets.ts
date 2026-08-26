@@ -1,4 +1,5 @@
-import { exampleSets } from "../data/exampleSets";
+import { edexcelUnit1Sets } from "../data/edexcelUnit1";
+import { exampleSets, type ExampleSet } from "../data/exampleSets";
 import { makeId } from "../lib/id";
 import type { TextMatchSet } from "../types";
 
@@ -66,18 +67,21 @@ export function exportSet(set: TextMatchSet): string {
 }
 
 /**
- * Seeds the built-in example sets (French/Italian/Spanish x Year 7/9/11)
- * into storage. Skips any example whose title already exists, so it's
- * safe to call more than once (e.g. clicking the button twice).
+ * Seeds a built-in collection of sets into storage. Skips any set whose
+ * title already exists, so it's safe to call more than once (e.g.
+ * clicking the load button twice).
  */
-export function loadExampleSets(): { added: number; skipped: number } {
+export function loadSetCollection(collection: ExampleSet[]): {
+  added: number;
+  skipped: number;
+} {
   const all = readAll();
   const existingTitles = new Set(all.map((s) => s.title));
   const now = Date.now();
   const toAdd: TextMatchSet[] = [];
   let skipped = 0;
 
-  for (const example of exampleSets) {
+  for (const example of collection) {
     if (existingTitles.has(example.title)) {
       skipped++;
       continue;
@@ -95,6 +99,16 @@ export function loadExampleSets(): { added: number; skipped: number } {
 
   if (toAdd.length > 0) writeAll([...all, ...toAdd]);
   return { added: toAdd.length, skipped };
+}
+
+/** Seeds the built-in demo sets (French/Italian/Spanish x Year 7/9/11). */
+export function loadExampleSets(): { added: number; skipped: number } {
+  return loadSetCollection(exampleSets);
+}
+
+/** Seeds the A Level Spanish Edexcel Unit 1 vocab sets (1.1, 1.2, 1.3). */
+export function loadEdexcelUnit1Sets(): { added: number; skipped: number } {
+  return loadSetCollection(edexcelUnit1Sets);
 }
 
 export function importSet(json: string): TextMatchSet {
