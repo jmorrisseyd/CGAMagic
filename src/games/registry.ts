@@ -51,7 +51,7 @@ export const GAMES: GameInfo[] = [
   {
     id: "hangman",
     name: "Hangman",
-    description: "Guess the hidden word one letter at a time, using the prompt as a clue.",
+    description: "Guess the hidden word one letter at a time — no clue, just spelling recall.",
     minPairs: 2,
   },
 ];

@@ -11,7 +11,7 @@ const ACCENTED = "àâäéèêëîïôöùûüçñ".split("");
 type Direction = "leftToRight" | "rightToLeft";
 
 export function Hangman({ set }: { set: TextMatchSet }) {
-  const [direction, setDirection] = useState<Direction>("leftToRight");
+  const [direction, setDirection] = useState<Direction>("rightToLeft");
   const [items, setItems] = useState<Pair[]>(() =>
     sample(set.pairs, Math.min(MAX_WORDS, set.pairs.length)),
   );
@@ -23,7 +23,6 @@ export function Hangman({ set }: { set: TextMatchSet }) {
 
   const current = items[index];
   const secret = direction === "leftToRight" ? current.right : current.left;
-  const clue = direction === "leftToRight" ? current.left : current.right;
   const guessLabel = direction === "leftToRight" ? set.rightLabel : set.leftLabel;
   const secretLetters = new Set(
     secret.toLowerCase().split("").filter((c) => /[a-zàâäéèêëîïôöùûüçñ]/.test(c)),
@@ -102,7 +101,6 @@ export function Hangman({ set }: { set: TextMatchSet }) {
               Word {index + 1} of {items.length}
             </div>
             <HangmanDrawing wrong={wrong} />
-            <div className="text-sm text-slate-500">Clue: {clue}</div>
             <div className="text-3xl font-mono tracking-widest">
               {secret.split("").map((ch, i) => {
                 const lower = ch.toLowerCase();
