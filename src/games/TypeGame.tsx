@@ -7,7 +7,10 @@ function normalize(s: string): string {
   return s.trim().toLowerCase();
 }
 
+type Direction = "leftToRight" | "rightToLeft";
+
 export function TypeGame({ set }: { set: TextMatchSet }) {
+  const [direction, setDirection] = useState<Direction>("leftToRight");
   const [items] = useState<Pair[]>(() => shuffle(set.pairs));
   const [index, setIndex] = useState(0);
   const [value, setValue] = useState("");
@@ -16,14 +19,21 @@ export function TypeGame({ set }: { set: TextMatchSet }) {
   const [done, setDone] = useState(false);
 
   const current = items[index];
-  const target = current?.right ?? "";
+  const promptText = direction === "leftToRight" ? current?.left : current?.right;
+  const target = direction === "leftToRight" ? current?.right ?? "" : current?.left ?? "";
+  const typeLabel = direction === "leftToRight" ? set.rightLabel : set.leftLabel;
 
-  function restart() {
+  function restart(nextDirection: Direction = direction) {
+    setDirection(nextDirection);
     setIndex(0);
     setValue("");
     setAttemptedWrong(false);
     setScore(0);
     setDone(false);
+  }
+
+  function switchDirection() {
+    restart(direction === "leftToRight" ? "rightToLeft" : "leftToRight");
   }
 
   function advance(gotIt: boolean) {
@@ -46,19 +56,6 @@ export function TypeGame({ set }: { set: TextMatchSet }) {
     }
   }
 
-  const feedback = target.split("").map((ch, i) => {
-    const typed = value[i];
-    let cls = "text-slate-300";
-    if (typed !== undefined) {
-      cls = normalize(typed) === normalize(ch) ? "text-green-600" : "text-red-600";
-    }
-    return (
-      <span key={i} className={cls}>
-        {typed ?? "_"}
-      </span>
-    );
-  });
-
   return (
     <GameShell
       setId={set.id}
@@ -77,7 +74,7 @@ export function TypeGame({ set }: { set: TextMatchSet }) {
             {score} of {items.length} correct first time.
           </div>
           <button
-            onClick={restart}
+            onClick={() => restart()}
             className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
           >
             Restart
@@ -85,19 +82,25 @@ export function TypeGame({ set }: { set: TextMatchSet }) {
         </div>
       ) : (
         <form onSubmit={submit} className="flex flex-col items-center gap-6 w-96">
+          <button
+            type="button"
+            onClick={switchDirection}
+            className="text-sm text-slate-500 underline"
+          >
+            Type in: {typeLabel} (click to switch)
+          </button>
           <div className="text-sm text-slate-500">
             Item {index + 1} of {items.length}
           </div>
           <div className="text-2xl font-bold bg-white shadow rounded-lg px-6 py-4 w-full text-center">
-            {current.left}
+            {promptText}
           </div>
-          <div className="font-mono text-2xl tracking-wide">{feedback}</div>
           <input
             autoFocus
             value={value}
             onChange={(e) => setValue(e.target.value)}
             className="w-full rounded-lg border-2 border-slate-300 px-4 py-3 text-lg text-center focus:border-blue-400 outline-none"
-            placeholder={`Type the ${set.rightLabel.toLowerCase()}...`}
+            placeholder={`Type the ${typeLabel.toLowerCase()}...`}
           />
           {attemptedWrong && (
             <div className="text-red-600 text-sm">Not quite — try again, or skip.</div>

@@ -8,7 +8,10 @@ const MAX_WRONG = 6;
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz".split("");
 const ACCENTED = "àâäéèêëîïôöùûüçñ".split("");
 
+type Direction = "leftToRight" | "rightToLeft";
+
 export function Hangman({ set }: { set: TextMatchSet }) {
+  const [direction, setDirection] = useState<Direction>("leftToRight");
   const [items, setItems] = useState<Pair[]>(() =>
     sample(set.pairs, Math.min(MAX_WORDS, set.pairs.length)),
   );
@@ -19,7 +22,9 @@ export function Hangman({ set }: { set: TextMatchSet }) {
   const [hanged, setHanged] = useState(0);
 
   const current = items[index];
-  const secret = current.right;
+  const secret = direction === "leftToRight" ? current.right : current.left;
+  const clue = direction === "leftToRight" ? current.left : current.right;
+  const guessLabel = direction === "leftToRight" ? set.rightLabel : set.leftLabel;
   const secretLetters = new Set(
     secret.toLowerCase().split("").filter((c) => /[a-zàâäéèêëîïôöùûüçñ]/.test(c)),
   );
@@ -28,13 +33,18 @@ export function Hangman({ set }: { set: TextMatchSet }) {
   const roundOver = won || lost;
   const allDone = index + 1 >= items.length && roundOver;
 
-  function newGame() {
+  function newGame(nextDirection: Direction = direction) {
+    setDirection(nextDirection);
     setItems(sample(set.pairs, Math.min(MAX_WORDS, set.pairs.length)));
     setIndex(0);
     setGuessed(new Set());
     setWrong(0);
     setSaved(0);
     setHanged(0);
+  }
+
+  function switchDirection() {
+    newGame(direction === "leftToRight" ? "rightToLeft" : "leftToRight");
   }
 
   function guess(letter: string) {
@@ -73,7 +83,7 @@ export function Hangman({ set }: { set: TextMatchSet }) {
               Saved {saved}, hanged {hanged}, of {items.length}.
             </div>
             <button
-              onClick={newGame}
+              onClick={() => newGame()}
               className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
             >
               Play again
@@ -81,11 +91,18 @@ export function Hangman({ set }: { set: TextMatchSet }) {
           </div>
         ) : (
           <>
+            <button
+              type="button"
+              onClick={switchDirection}
+              className="text-sm text-slate-500 underline"
+            >
+              Guessing: {guessLabel} (click to switch)
+            </button>
             <div className="text-sm text-slate-500">
               Word {index + 1} of {items.length}
             </div>
             <HangmanDrawing wrong={wrong} />
-            <div className="text-sm text-slate-500">Clue: {current.left}</div>
+            <div className="text-sm text-slate-500">Clue: {clue}</div>
             <div className="text-3xl font-mono tracking-widest">
               {secret.split("").map((ch, i) => {
                 const lower = ch.toLowerCase();
