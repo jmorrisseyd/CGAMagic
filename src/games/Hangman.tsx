@@ -1,6 +1,7 @@
 import { useState } from "react";
-import type { Pair, TextMatchSet } from "../types";
+import type { PlayableSet } from "../lib/compile";
 import { sample } from "../lib/shuffle";
+import { sideText, type Pair } from "../types";
 import { GameShell } from "./GameShell";
 
 const MAX_WORDS = 16;
@@ -10,7 +11,7 @@ const ACCENTED = "àâäéèêëîïôöùûüçñ".split("");
 
 type Direction = "leftToRight" | "rightToLeft";
 
-export function Hangman({ set }: { set: TextMatchSet }) {
+export function Hangman({ set }: { set: PlayableSet }) {
   const [direction, setDirection] = useState<Direction>("rightToLeft");
   const [items, setItems] = useState<Pair[]>(() =>
     sample(set.pairs, Math.min(MAX_WORDS, set.pairs.length)),
@@ -22,7 +23,7 @@ export function Hangman({ set }: { set: TextMatchSet }) {
   const [hanged, setHanged] = useState(0);
 
   const current = items[index];
-  const secret = direction === "leftToRight" ? current.right : current.left;
+  const secret = sideText(direction === "leftToRight" ? current.right : current.left);
   const guessLabel = direction === "leftToRight" ? set.rightLabel : set.leftLabel;
   const secretLetters = new Set(
     secret.toLowerCase().split("").filter((c) => /[a-zàâäéèêëîïôöùûüçñ]/.test(c)),

@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
-import type { Pair, TextMatchSet } from "../types";
+import { SideView } from "../components/SideView";
+import type { PlayableSet } from "../lib/compile";
 import { buildLines } from "../lib/lines";
 import { buildChoices, type Choice } from "../lib/quiz";
 import { shuffle } from "../lib/shuffle";
+import type { Pair } from "../types";
 import { GameShell } from "./GameShell";
 
 type Size = "3x3" | "3x4" | "4x4";
@@ -24,7 +26,7 @@ function assignCells(pairs: Pair[], count: number): Pair[] {
   return out;
 }
 
-export function ThreeInARow({ set }: { set: TextMatchSet }) {
+export function ThreeInARow({ set }: { set: PlayableSet }) {
   const [size, setSize] = useState<Size>("3x3");
   const { rows, cols } = SIZES[size];
   const total = rows * cols;
@@ -158,7 +160,10 @@ export function ThreeInARow({ set }: { set: TextMatchSet }) {
                           : "bg-white hover:bg-slate-50 border-2 border-slate-300"
                     }`}
                   >
-                    {cellOwner ? p.right : p.left}
+                    <SideView
+                      side={cellOwner ? p.right : p.left}
+                      imageClassName="max-h-20"
+                    />
                   </button>
                 );
               })}
@@ -172,7 +177,7 @@ export function ThreeInARow({ set }: { set: TextMatchSet }) {
           <div className="bg-white rounded-xl shadow-xl p-6 flex flex-col items-center gap-5 max-w-md w-full">
             <div className="text-sm text-slate-500">Team {turn}, answer:</div>
             <div className="text-2xl font-bold text-center">
-              {cellPairs[active.cell].left}
+              <SideView side={cellPairs[active.cell].left} imageClassName="max-h-40" />
             </div>
             <div className="flex flex-col gap-3 w-full">
               {active.choices.map((c, i) => (
@@ -181,7 +186,7 @@ export function ThreeInARow({ set }: { set: TextMatchSet }) {
                   onClick={() => answer(c)}
                   className="rounded-lg bg-slate-100 hover:bg-slate-200 px-4 py-3 font-medium"
                 >
-                  {c.text}
+                  <SideView side={c.side} imageClassName="max-h-24 mx-auto" />
                 </button>
               ))}
             </div>

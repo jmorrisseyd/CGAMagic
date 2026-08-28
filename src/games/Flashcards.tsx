@@ -1,9 +1,11 @@
 import { useState } from "react";
-import type { Pair, TextMatchSet } from "../types";
+import { SideView } from "../components/SideView";
+import type { PlayableSet } from "../lib/compile";
 import { shuffle } from "../lib/shuffle";
+import type { Pair } from "../types";
 import { GameShell } from "./GameShell";
 
-export function Flashcards({ set }: { set: TextMatchSet }) {
+export function Flashcards({ set }: { set: PlayableSet }) {
   const [random, setRandom] = useState(true);
   const [queue, setQueue] = useState<Pair[]>(() =>
     random ? shuffle(set.pairs) : set.pairs,
@@ -45,24 +47,19 @@ export function Flashcards({ set }: { set: TextMatchSet }) {
     }
   }
 
-  const status = (
-    <div className="text-sm text-slate-200">
-      Known: {known} &middot; Cards left: {queue.length}
-    </div>
-  );
-
   return (
     <GameShell
       setId={set.id}
       setTitle={set.title}
       gameName="Flashcards"
-      status={status}
+      status={
+        <div className="text-sm text-slate-200">
+          Known: {known} &middot; Cards left: {queue.length}
+        </div>
+      }
     >
       <div className="flex flex-col items-center gap-6">
-        <button
-          onClick={toggleOrder}
-          className="text-sm text-slate-500 underline"
-        >
+        <button onClick={toggleOrder} className="text-sm text-slate-500 underline">
           Order: {random ? "Random" : "In order"} (click to switch)
         </button>
 
@@ -74,10 +71,10 @@ export function Flashcards({ set }: { set: TextMatchSet }) {
               onClick={() => setRevealed((r) => !r)}
               className="w-96 h-56 bg-white rounded-xl shadow-lg flex items-center justify-center text-center p-6 text-2xl font-medium cursor-pointer select-none border-4 border-slate-300"
             >
-              {revealed ? current.right : current.left}
+              <SideView side={revealed ? current.right : current.left} />
             </div>
             <div className="text-sm text-slate-500">
-              {revealed ? `${set.rightLabel}` : `${set.leftLabel}`} — click card to{" "}
+              {revealed ? set.rightLabel : set.leftLabel} — click card to{" "}
               {revealed ? "hide" : "reveal"}
             </div>
             {revealed && (

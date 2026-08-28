@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import type { Pair, TextMatchSet } from "../types";
+import { SideView } from "../components/SideView";
+import type { PlayableSet } from "../lib/compile";
 import { sample, shuffle } from "../lib/shuffle";
+import type { Pair } from "../types";
 import { GameShell } from "./GameShell";
 
 const MAX_ITEMS = 16;
 const SECONDS_PER_ITEM = 6;
 
-export function AgainstTheClock({ set }: { set: TextMatchSet }) {
+export function AgainstTheClock({ set }: { set: PlayableSet }) {
   const [items, setItems] = useState<Pair[]>(() =>
     sample(set.pairs, Math.min(MAX_ITEMS, set.pairs.length)),
   );
@@ -131,7 +133,7 @@ export function AgainstTheClock({ set }: { set: TextMatchSet }) {
                           : "bg-white hover:bg-slate-50 shadow"
                   }`}
                 >
-                  {p.left}
+                  <SideView side={p.left} imageClassName="max-h-16" />
                 </button>
               ))}
             </div>
@@ -149,7 +151,7 @@ export function AgainstTheClock({ set }: { set: TextMatchSet }) {
                         : "bg-white hover:bg-slate-50 shadow"
                   }`}
                 >
-                  {p.right}
+                  <SideView side={p.right} imageClassName="max-h-16" />
                 </button>
               ))}
             </div>

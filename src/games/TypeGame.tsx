@@ -1,6 +1,8 @@
 import { useState } from "react";
-import type { Pair, TextMatchSet } from "../types";
+import { SideView } from "../components/SideView";
+import type { PlayableSet } from "../lib/compile";
 import { shuffle } from "../lib/shuffle";
+import { sideText, type Pair } from "../types";
 import { GameShell } from "./GameShell";
 
 function normalize(s: string): string {
@@ -9,7 +11,7 @@ function normalize(s: string): string {
 
 type Direction = "leftToRight" | "rightToLeft";
 
-export function TypeGame({ set }: { set: TextMatchSet }) {
+export function TypeGame({ set }: { set: PlayableSet }) {
   const [direction, setDirection] = useState<Direction>("leftToRight");
   const [items] = useState<Pair[]>(() => shuffle(set.pairs));
   const [index, setIndex] = useState(0);
@@ -19,8 +21,9 @@ export function TypeGame({ set }: { set: TextMatchSet }) {
   const [done, setDone] = useState(false);
 
   const current = items[index];
-  const promptText = direction === "leftToRight" ? current?.left : current?.right;
-  const target = direction === "leftToRight" ? current?.right ?? "" : current?.left ?? "";
+  const promptSide = direction === "leftToRight" ? current?.left : current?.right;
+  const answerSide = direction === "leftToRight" ? current?.right : current?.left;
+  const target = answerSide ? sideText(answerSide) : "";
   const typeLabel = direction === "leftToRight" ? set.rightLabel : set.leftLabel;
 
   function restart(nextDirection: Direction = direction) {
@@ -92,8 +95,8 @@ export function TypeGame({ set }: { set: TextMatchSet }) {
           <div className="text-sm text-slate-500">
             Item {index + 1} of {items.length}
           </div>
-          <div className="text-2xl font-bold bg-white shadow rounded-lg px-6 py-4 w-full text-center">
-            {promptText}
+          <div className="text-2xl font-bold bg-white shadow rounded-lg px-6 py-4 w-full text-center min-h-20 flex items-center justify-center">
+            {promptSide && <SideView side={promptSide} imageClassName="max-h-40" />}
           </div>
           <input
             autoFocus

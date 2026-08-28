@@ -9,13 +9,15 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { useMemo, useState } from "react";
-import type { TextMatchSet } from "../types";
+import { SideView } from "../components/SideView";
+import type { PlayableSet } from "../lib/compile";
 import { shuffle } from "../lib/shuffle";
+import type { Side } from "../types";
 import { GameShell } from "./GameShell";
 
 const BATCH_SIZE = 8;
 
-export function DragMatch({ set }: { set: TextMatchSet }) {
+export function DragMatch({ set }: { set: PlayableSet }) {
   const batches = useMemo(() => chunk(set.pairs, BATCH_SIZE), [set.pairs]);
   const [batchIndex, setBatchIndex] = useState(0);
   const batch = batches[batchIndex];
@@ -109,12 +111,12 @@ export function DragMatch({ set }: { set: TextMatchSet }) {
               const isChecked = checked[p.id];
               return (
                 <div key={p.id} className="contents">
-                  <div className="flex items-center bg-white rounded-lg px-4 py-3 shadow font-medium">
-                    {p.left}
+                  <div className="flex items-center bg-white rounded-lg px-4 py-3 shadow font-medium min-h-16">
+                    <SideView side={p.left} imageClassName="max-h-20" />
                   </div>
                   <Slot
                     id={p.id}
-                    filledText={assignedPair?.right}
+                    filledSide={assignedPair?.right}
                     state={
                       isChecked === undefined
                         ? "empty"
@@ -137,7 +139,7 @@ export function DragMatch({ set }: { set: TextMatchSet }) {
             )}
             {pool.map((id) => {
               const pair = batch.find((x) => x.id === id)!;
-              return <Chip key={id} id={id} text={pair.right} />;
+              return <Chip key={id} id={id} side={pair.right} />;
             })}
           </div>
 
@@ -172,7 +174,7 @@ export function DragMatch({ set }: { set: TextMatchSet }) {
   );
 }
 
-function Chip({ id, text }: { id: string; text: string }) {
+function Chip({ id, side }: { id: string; side: Side }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({ id });
   const style = transform
@@ -191,19 +193,19 @@ function Chip({ id, text }: { id: string; text: string }) {
         isDragging ? "opacity-50" : ""
       }`}
     >
-      {text}
+      <SideView side={side} imageClassName="max-h-16" />
     </button>
   );
 }
 
 function Slot({
   id,
-  filledText,
+  filledSide,
   state,
   onClear,
 }: {
   id: string;
-  filledText?: string;
+  filledSide?: Side;
   state: "empty" | "correct" | "wrong";
   onClear: () => void;
 }) {
@@ -219,8 +221,10 @@ function Slot({
           : "bg-white border-slate-300";
   return (
     <div ref={setNodeRef} className={`${base} ${color}`}>
-      <span className="font-medium">{filledText ?? ""}</span>
-      {filledText && state !== "correct" && (
+      <span className="font-medium">
+        {filledSide && <SideView side={filledSide} imageClassName="max-h-16" />}
+      </span>
+      {filledSide && state !== "correct" && (
         <button
           onClick={onClear}
           className="text-slate-400 hover:text-slate-600 text-sm"

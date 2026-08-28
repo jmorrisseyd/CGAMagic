@@ -1,13 +1,15 @@
 import { useState } from "react";
-import type { Pair, TextMatchSet } from "../types";
+import { SideView } from "../components/SideView";
+import type { PlayableSet } from "../lib/compile";
 import { buildChoices, type Choice } from "../lib/quiz";
 import { sample } from "../lib/shuffle";
+import type { Pair } from "../types";
 import { GameShell } from "./GameShell";
 
 const MAX_QUESTIONS = 15;
 const START_PLAY_SAFES = 4;
 
-export function TowerBlock({ set }: { set: TextMatchSet }) {
+export function TowerBlock({ set }: { set: PlayableSet }) {
   const [order, setOrder] = useState<Pair[]>(() =>
     sample(set.pairs, Math.min(MAX_QUESTIONS, set.pairs.length)),
   );
@@ -123,7 +125,7 @@ export function TowerBlock({ set }: { set: TextMatchSet }) {
                       : "bg-white shadow"
                 }`}
               >
-                {current.left}
+                <SideView side={current.left} imageClassName="max-h-40 mx-auto" />
               </div>
               <div className="grid grid-cols-2 gap-3 w-full">
                 {choices.map((c, i) => (
@@ -133,7 +135,7 @@ export function TowerBlock({ set }: { set: TextMatchSet }) {
                     disabled={!!flash}
                     className="rounded-lg bg-slate-100 hover:bg-slate-200 px-4 py-3 font-medium"
                   >
-                    {c.text}
+                    <SideView side={c.side} imageClassName="max-h-24 mx-auto" />
                   </button>
                 ))}
               </div>

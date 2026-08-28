@@ -1,25 +1,27 @@
 import { useState } from "react";
-import type { Pair, TextMatchSet } from "../types";
+import { SideView } from "../components/SideView";
+import type { PlayableSet } from "../lib/compile";
 import { sample, shuffle } from "../lib/shuffle";
+import type { Pair, Side } from "../types";
 import { GameShell } from "./GameShell";
 
 const MAX_PAIRS = 8;
 
 interface Card {
   pairId: string;
-  text: string;
+  side: Side;
 }
 
 function buildCards(pairs: Pair[]): Card[] {
   const chosen = sample(pairs, Math.min(MAX_PAIRS, pairs.length));
   const cards: Card[] = chosen.flatMap((p) => [
-    { pairId: p.id, text: p.left },
-    { pairId: p.id, text: p.right },
+    { pairId: p.id, side: p.left },
+    { pairId: p.id, side: p.right },
   ]);
   return shuffle(cards);
 }
 
-export function Pelmanism({ set }: { set: TextMatchSet }) {
+export function Pelmanism({ set }: { set: PlayableSet }) {
   const [mode, setMode] = useState<"1p" | "2p">("1p");
   const [cards, setCards] = useState<Card[]>(() => buildCards(set.pairs));
   const [flipped, setFlipped] = useState<number[]>([]);
@@ -140,7 +142,11 @@ export function Pelmanism({ set }: { set: TextMatchSet }) {
                           : "bg-slate-700 hover:bg-slate-600 text-white"
                     }`}
                   >
-                    {isFlipped ? c.text : "?"}
+                    {isFlipped ? (
+                      <SideView side={c.side} imageClassName="max-h-16" />
+                    ) : (
+                      "?"
+                    )}
                   </button>
                 );
               })}

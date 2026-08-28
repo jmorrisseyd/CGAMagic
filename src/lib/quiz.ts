@@ -1,13 +1,13 @@
-import type { Pair } from "../types";
+import type { Pair, Side } from "../types";
 import { sample, shuffle } from "./shuffle";
 
 export interface Choice {
-  text: string;
+  side: Side;
   isCorrect: boolean;
   pairId: string;
 }
 
-/** Build a multiple-choice set of `count` right-hand answers for `correct`, drawn from the other pairs. */
+/** Build `count` multiple-choice answers for `correct`, drawn from the other pairs. */
 export function buildChoices(
   allPairs: Pair[],
   correct: Pair,
@@ -15,13 +15,12 @@ export function buildChoices(
 ): Choice[] {
   const others = allPairs.filter((p) => p.id !== correct.id);
   const distractors = sample(others, Math.min(count - 1, others.length));
-  const choices: Choice[] = [
-    { text: correct.right, isCorrect: true, pairId: correct.id },
+  return shuffle([
+    { side: correct.right, isCorrect: true, pairId: correct.id },
     ...distractors.map((p) => ({
-      text: p.right,
+      side: p.right,
       isCorrect: false,
       pairId: p.id,
     })),
-  ];
-  return shuffle(choices);
+  ]);
 }
