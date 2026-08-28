@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { SideView } from "../components/SideView";
 import type { PlayableSet } from "../lib/compile";
 import { sample, shuffle } from "../lib/shuffle";
-import type { Pair } from "../types";
+import type { Pair, Side } from "../types";
 import { GameShell } from "./GameShell";
 
 const ROUNDS = 16;
@@ -14,14 +14,28 @@ interface Round {
   isTrue: boolean;
 }
 
+/** Two answers count as the same if a student couldn't tell them apart. */
+function sameAnswer(a: Side, b: Side): boolean {
+  if (a.kind === "text" && b.kind === "text") {
+    return a.text.trim().toLowerCase() === b.text.trim().toLowerCase();
+  }
+  if (a.kind === "image" && b.kind === "image") return a.mediaId === b.mediaId;
+  if (a.kind === "audio" && b.kind === "audio") return a.mediaId === b.mediaId;
+  return false;
+}
+
 function buildRounds(pairs: Pair[]): Round[] {
   return sample(pairs, Math.min(ROUNDS, pairs.length)).map((prompt) => {
     // Half true, half paired with someone else's answer.
     const isTrue = Math.random() < 0.5;
     if (isTrue) return { prompt, shown: prompt, isTrue: true };
-    const others = pairs.filter((p) => p.id !== prompt.id);
-    const impostor = others.length > 0 ? shuffle(others)[0] : prompt;
-    return { prompt, shown: impostor, isTrue: impostor.id === prompt.id };
+    // Synonyms are common in vocab lists, so an impostor carrying the same
+    // answer would show a genuinely correct pairing marked false. Skip those.
+    const others = pairs.filter(
+      (p) => p.id !== prompt.id && !sameAnswer(p.right, prompt.right),
+    );
+    if (others.length === 0) return { prompt, shown: prompt, isTrue: true };
+    return { prompt, shown: shuffle(others)[0], isTrue: false };
   });
 }
 

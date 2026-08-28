@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { SideView } from "../components/SideView";
 import { buildChoices } from "../lib/quiz";
 import { shuffle } from "../lib/shuffle";
@@ -24,10 +25,15 @@ function Rule() {
 
 export function MatchingSheet({ pairs, leftLabel, rightLabel, showAnswers }: SheetProps) {
   // Right column shuffled; the number beside each left item is the answer.
-  const shuffledRight = shuffle(pairs.map((p, i) => ({ pair: p, originalIndex: i })));
-  const answerFor = new Map(
-    shuffledRight.map((entry, position) => [entry.pair.id, position + 1]),
-  );
+  // Memoised on `pairs` alone so toggling the answer key reveals the numbers
+  // for the sheet already printed rather than reshuffling it.
+  const { shuffledRight, answerFor } = useMemo(() => {
+    const order = shuffle(pairs.map((p, i) => ({ pair: p, originalIndex: i })));
+    return {
+      shuffledRight: order,
+      answerFor: new Map(order.map((entry, position) => [entry.pair.id, position + 1])),
+    };
+  }, [pairs]);
 
   return (
     <div className="grid grid-cols-2 gap-x-10">
@@ -64,10 +70,16 @@ export function MatchingSheet({ pairs, leftLabel, rightLabel, showAnswers }: She
 }
 
 export function MultiMatchSheet({ pairs, showAnswers }: SheetProps) {
+  // Options are drawn once per pairs list, so ticking the answer key marks
+  // the same three options the students were given.
+  const choicesByPair = useMemo(
+    () => new Map(pairs.map((p) => [p.id, buildChoices(pairs, p, 3)])),
+    [pairs],
+  );
   return (
     <ol className="flex flex-col gap-4">
       {pairs.map((p, i) => {
-        const choices = buildChoices(pairs, p, 3);
+        const choices = choicesByPair.get(p.id) ?? [];
         return (
           <li key={p.id} className="print-keep">
             <div className="flex items-start gap-2">
@@ -98,6 +110,12 @@ export function MultiMatchSheet({ pairs, showAnswers }: SheetProps) {
 }
 
 export function MissingLettersSheet({ pairs, showAnswers }: SheetProps) {
+  // Which letters are blanked is fixed per pairs list, so the answer key
+  // corresponds to the gaps the students actually got.
+  const blanked = useMemo(
+    () => new Map(pairs.map((p) => [p.id, blankLetters(sideText(p.right))])),
+    [pairs],
+  );
   return (
     <ol className="flex flex-col gap-3">
       {pairs.map((p, i) => {
@@ -109,7 +127,7 @@ export function MissingLettersSheet({ pairs, showAnswers }: SheetProps) {
               <Stim side={p.left} />
             </span>
             <span className="font-mono tracking-widest text-lg">
-              {showAnswers ? answer : blankLetters(answer)}
+              {showAnswers ? answer : blanked.get(p.id)}
             </span>
           </li>
         );
@@ -119,6 +137,12 @@ export function MissingLettersSheet({ pairs, showAnswers }: SheetProps) {
 }
 
 export function AnagramsSheet({ pairs, showAnswers }: SheetProps) {
+  // Jumbles are fixed per pairs list, so the answer key solves the same
+  // anagrams that were printed.
+  const jumbled = useMemo(
+    () => new Map(pairs.map((p) => [p.id, anagram(sideText(p.right))])),
+    [pairs],
+  );
   return (
     <ol className="flex flex-col gap-3">
       {pairs.map((p, i) => {
@@ -130,7 +154,7 @@ export function AnagramsSheet({ pairs, showAnswers }: SheetProps) {
               <Stim side={p.left} />
             </span>
             <span className="font-mono tracking-widest text-lg uppercase">
-              {anagram(answer)}
+              {jumbled.get(p.id)}
             </span>
             <span className="flex-1 flex items-center">
               {showAnswers ? (
@@ -147,8 +171,12 @@ export function AnagramsSheet({ pairs, showAnswers }: SheetProps) {
 }
 
 export function WordsearchSheet({ pairs, showAnswers }: SheetProps) {
-  const words = pairs.map((p) => sideText(p.right)).filter(Boolean);
-  const { grid, placements, skipped } = buildWordsearch(words);
+  // The grid is built once per pairs list — regenerating it when the answer
+  // key is ticked would highlight words in a puzzle nobody was given.
+  const { grid, placements, skipped } = useMemo(
+    () => buildWordsearch(pairs.map((p) => sideText(p.right)).filter(Boolean)),
+    [pairs],
+  );
 
   // Cells that form a placed word, so the answer key can highlight them.
   const solution = new Set<string>();
@@ -217,16 +245,21 @@ export function WordsearchSheet({ pairs, showAnswers }: SheetProps) {
  * chain returns to the start. Tiles are shuffled for cutting out.
  */
 export function DominoesSheet({ pairs }: SheetProps) {
-  const ordered = pairs;
-  const tiles = ordered.map((p, i) => ({
-    id: p.id,
-    answer: p.right,
-    prompt: ordered[(i + 1) % ordered.length].left,
-  }));
+  const tiles = useMemo(
+    () =>
+      shuffle(
+        pairs.map((p, i) => ({
+          id: p.id,
+          answer: p.right,
+          prompt: pairs[(i + 1) % pairs.length].left,
+        })),
+      ),
+    [pairs],
+  );
 
   return (
     <div className="grid grid-cols-2 gap-2">
-      {shuffle(tiles).map((t) => (
+      {tiles.map((t) => (
         <div
           key={t.id}
           className="border-2 border-slate-800 print-rule rounded flex items-stretch print-keep"
@@ -245,11 +278,15 @@ export function DominoesSheet({ pairs }: SheetProps) {
 }
 
 export function PelmanismCardsSheet({ pairs }: SheetProps) {
-  const cards = shuffle(
-    pairs.flatMap((p) => [
-      { key: `${p.id}-l`, side: p.left },
-      { key: `${p.id}-r`, side: p.right },
-    ]),
+  const cards = useMemo(
+    () =>
+      shuffle(
+        pairs.flatMap((p) => [
+          { key: `${p.id}-l`, side: p.left },
+          { key: `${p.id}-r`, side: p.right },
+        ]),
+      ),
+    [pairs],
   );
   return (
     <div className="grid grid-cols-4 gap-2">

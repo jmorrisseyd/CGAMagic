@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { PlayableSet } from "../lib/compile";
 import { sample } from "../lib/shuffle";
-import { sideText, type Pair } from "../types";
+import { isTextSide, sideText, type Pair } from "../types";
 import { GameShell } from "./GameShell";
 
 const MAX_WORDS = 16;
@@ -11,8 +11,21 @@ const ACCENTED = "àâäéèêëîïôöùûüçñ".split("");
 
 type Direction = "leftToRight" | "rightToLeft";
 
+/** A side is only guessable if it's written text — you can't spell a picture. */
+function sideIsSpellable(pairs: PlayableSet["pairs"], which: "left" | "right") {
+  return pairs.length > 0 && pairs.every((p) => isTextSide(p[which]));
+}
+
 export function Hangman({ set }: { set: PlayableSet }) {
-  const [direction, setDirection] = useState<Direction>("rightToLeft");
+  const leftSpellable = sideIsSpellable(set.pairs, "left");
+  const rightSpellable = sideIsSpellable(set.pairs, "right");
+  // Prefer guessing the left (target language) side, but fall back to the
+  // right when the left is a picture or a sound — otherwise the secret is
+  // empty and the round counts as won before it starts.
+  const [direction, setDirection] = useState<Direction>(
+    leftSpellable ? "rightToLeft" : "leftToRight",
+  );
+  const canSwitch = leftSpellable && rightSpellable;
   const [items, setItems] = useState<Pair[]>(() =>
     sample(set.pairs, Math.min(MAX_WORDS, set.pairs.length)),
   );
@@ -91,13 +104,17 @@ export function Hangman({ set }: { set: PlayableSet }) {
           </div>
         ) : (
           <>
-            <button
-              type="button"
-              onClick={switchDirection}
-              className="text-sm text-slate-500 underline"
-            >
-              Guessing: {guessLabel} (click to switch)
-            </button>
+            {canSwitch ? (
+              <button
+                type="button"
+                onClick={switchDirection}
+                className="text-sm text-slate-500 underline"
+              >
+                Guessing: {guessLabel} (click to switch)
+              </button>
+            ) : (
+              <span className="text-sm text-slate-500">Guessing: {guessLabel}</span>
+            )}
             <div className="text-sm text-slate-500">
               Word {index + 1} of {items.length}
             </div>

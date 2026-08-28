@@ -10,7 +10,13 @@ import type {
   Pair,
   Side,
 } from "../types";
-import { base64ToBlob, blobToBase64, getMedia, putMedia } from "./media";
+import {
+  base64ToBlob,
+  blobToBase64,
+  getMedia,
+  pruneMedia,
+  putMedia,
+} from "./media";
 
 const STORAGE_KEY = "cgamagic:textmatch:sets";
 
@@ -186,6 +192,9 @@ export function saveSet(set: AnySet): void {
 
 export function deleteSet(id: string): void {
   writeAll(readAll().filter((s) => s.id !== id));
+  // Drop any pictures or sounds the deleted set was the last owner of,
+  // otherwise they sit in IndexedDB forever eating the storage quota.
+  void pruneMedia(referencedMediaIds());
 }
 
 /** Every mediaId any stored set still points at — used to prune orphan blobs. */

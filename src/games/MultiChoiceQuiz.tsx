@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { shuffle } from "../lib/shuffle";
 import type { MultiChoiceQuestion, MultiChoiceSet } from "../types";
 import { GameShell } from "./GameShell";
@@ -24,6 +25,26 @@ export function MultiChoiceQuiz({ set }: { set: MultiChoiceSet }) {
   const [done, setDone] = useState(false);
 
   const current = asked[index];
+
+  // A set with no questions has nothing to render — say so rather than
+  // crashing on current.question.
+  if (!current && !done) {
+    return (
+      <GameShell setId={set.id} setTitle={set.title} gameName="Multi-Choice">
+        <div className="text-center flex flex-col items-center gap-4">
+          <p className="text-slate-500">
+            This set has no questions yet.
+          </p>
+          <Link
+            to={`/edit/${set.id}`}
+            className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
+          >
+            Add questions →
+          </Link>
+        </div>
+      </GameShell>
+    );
+  }
 
   function restart() {
     setAsked(prepare(set.questions));

@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { makeId } from "../lib/id";
-import { putMedia } from "../storage/media";
+import { deleteMedia, putMedia } from "../storage/media";
 import type { Side, SideKind } from "../types";
 import { useMediaUrl } from "./SideView";
 
@@ -29,6 +29,8 @@ export function SideEditor({
     if (!file) return;
     const id = makeId();
     await putMedia(id, file);
+    // Replacing a picture or sound leaves the previous blob unreferenced.
+    if (mediaId) await deleteMedia(mediaId);
     onChange(
       kind === "image"
         ? { kind: "image", mediaId: id, alt: file.name.replace(/\.[^.]+$/, "") }

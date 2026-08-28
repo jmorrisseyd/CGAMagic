@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { makeId } from "../lib/id";
 import { getSet, saveSet } from "../storage/sets";
 import type { AnySet, MultiChoiceQuestion, MultiChoiceSet } from "../types";
+import { confirmDiscard, useUnsavedGuard } from "../lib/useUnsavedGuard";
 
 const MAX_OPTIONS = 6;
 
@@ -13,6 +14,9 @@ export function MultiChoiceEditor() {
     setId ? getSet(setId) : undefined,
   );
   const [savedFlash, setSavedFlash] = useState(false);
+  const [dirty, setDirty] = useState(false);
+
+  useUnsavedGuard(dirty);
 
   if (!setId || !set) return <Navigate to="/" replace />;
   if (set.kind !== "multichoice") return <Navigate to="/" replace />;
@@ -20,6 +24,7 @@ export function MultiChoiceEditor() {
   const mc = set as MultiChoiceSet;
 
   function updateSet(fn: (s: MultiChoiceSet) => MultiChoiceSet) {
+    setDirty(true);
     setSet((s) => (s && s.kind === "multichoice" ? fn(s) : s));
   }
 
@@ -65,6 +70,7 @@ export function MultiChoiceEditor() {
 
   function save() {
     saveSet(mc);
+    setDirty(false);
     setSavedFlash(true);
     setTimeout(() => setSavedFlash(false), 1500);
   }
@@ -92,6 +98,9 @@ export function MultiChoiceEditor() {
           </button>
           <Link
             to="/"
+            onClick={(e) => {
+              if (!confirmDiscard(dirty)) e.preventDefault();
+            }}
             className="rounded bg-slate-600 hover:bg-slate-500 px-3 py-2 text-sm font-medium"
           >
             ← All sets

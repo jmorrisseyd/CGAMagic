@@ -4,6 +4,7 @@ import { SideEditor, emptySide } from "../components/SideEditor";
 import { makeId } from "../lib/id";
 import { getSet, saveSet } from "../storage/sets";
 import type { AnySet, MatchSet, Pair, Side } from "../types";
+import { confirmDiscard, useUnsavedGuard } from "../lib/useUnsavedGuard";
 
 export function Editor() {
   const { setId } = useParams<{ setId: string }>();
@@ -13,6 +14,9 @@ export function Editor() {
   );
   const [bulk, setBulk] = useState("");
   const [savedFlash, setSavedFlash] = useState(false);
+  const [dirty, setDirty] = useState(false);
+
+  useUnsavedGuard(dirty);
 
   if (!setId || !set) return <Navigate to="/" replace />;
   if (set.kind !== "match") return <Navigate to="/" replace />;
@@ -21,6 +25,7 @@ export function Editor() {
   const bulkable = matchSet.leftKind === "text" && matchSet.rightKind === "text";
 
   function update(patch: Partial<MatchSet>) {
+    setDirty(true);
     setSet((s) => (s ? ({ ...s, ...patch } as AnySet) : s));
   }
 
@@ -30,6 +35,7 @@ export function Editor() {
    * other (e.g. clicking "Add row" twice quickly).
    */
   function updatePairs(fn: (pairs: Pair[]) => Pair[]) {
+    setDirty(true);
     setSet((s) =>
       s && s.kind === "match" ? ({ ...s, pairs: fn(s.pairs) } as AnySet) : s,
     );
@@ -79,6 +85,7 @@ export function Editor() {
 
   function save() {
     saveSet(matchSet);
+    setDirty(false);
     setSavedFlash(true);
     setTimeout(() => setSavedFlash(false), 1500);
   }
@@ -108,6 +115,9 @@ export function Editor() {
           </button>
           <Link
             to="/"
+            onClick={(e) => {
+              if (!confirmDiscard(dirty)) e.preventDefault();
+            }}
             className="rounded bg-slate-600 hover:bg-slate-500 px-3 py-2 text-sm font-medium"
           >
             ← All sets
