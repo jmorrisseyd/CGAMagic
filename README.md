@@ -4,20 +4,49 @@ A browser-based clone of [MDL Software's TaskMagic3](https://www.mdlsoft.co.uk) 
 
 No accounts, no server — everything runs and saves in your browser (with JSON export/import to move sets between machines).
 
-## Status: Phase 1 — Text Match
+**Live:** https://jmorrisseyd.github.io/CGAMagic/
 
-TaskMagic3 has 8 template families (Text Match, Picture Match, Sound Match, Pic-Sound, Grid Match, Mix & Gap, Dialogues, Multi-Choice), most sharing a common bank of ~20 game engines. Phase 1 builds that shared engine on **Text Match** (plain text-to-text pairs):
+## Templates
 
-- Flashcards
-- Drag & Match
-- 3 in a Row
-- Pelmanism (1 or 2 player)
-- Against the Clock
-- Tower Block
-- Type
-- Hangman
+| Template | Authoring | Status |
+| --- | --- | --- |
+| Text Match | text ↔ text | ✅ |
+| Picture Match | image ↔ text | ✅ |
+| Sound Match | audio ↔ text | ✅ |
+| Pic-Sound | audio ↔ image | ✅ |
+| Grid Match | row × column headers → cell | ✅ |
+| Multi-Choice | question + options | ✅ |
+| Mix & Gap | text reconstruction | ⬜ not yet |
+| Dialogues | speaker script | ⬜ not yet |
 
-Later phases: reuse this engine for Picture/Sound/Grid/Pic-Sound Match (swap the stimulus type), then build Mix & Gap, Dialogues, and Multi-Choice as their own engines, plus printable worksheets.
+## Games
+
+The first five templates all compile down to the same pair model, so every
+game below works with any of them (games needing a typed answer are hidden
+when neither side of a pair holds text).
+
+Flashcards · Multi-Match · Drag & Match · 3 in a Row · Pelmanism (1–2 player) ·
+Against the Clock · True or False? · Tower Block · Invaders · Football · OXO ·
+Type · Hangman · Trainer (practice/test)
+
+Multi-Choice has its own single quiz activity.
+
+Still to build from the original's bank: Maze, Maze II, Spin, Pool, Doors,
+Invaders II, Snake, 3 in a Row II, 5 Counters, Jump!, plus printable
+worksheets (matching, dominoes, wordsearch, gap-fill, pelmanism cards).
+
+## How it's put together
+
+- **`src/types.ts`** — a pair's two sides are a tagged union (`text | image | audio`).
+  Text/Picture/Sound/Pic-Sound Match are one `MatchSet` type differing only in
+  which kind each side holds.
+- **`src/lib/compile.ts`** — flattens any set kind into the `Pair[]` the game
+  bank consumes, so a new template inherits every game for free.
+- **`src/storage/media.ts`** — pictures and sounds go in IndexedDB, not
+  localStorage (whose ~5MB quota a dozen photos would exhaust). Sets store only
+  a `mediaId`; export inlines the blobs as base64 so a shared file stands alone.
+- **Migration** — sets saved before the template rework are upgraded on read, so
+  work already in a teacher's browser keeps opening.
 
 ## Development
 
@@ -25,3 +54,5 @@ Later phases: reuse this engine for Picture/Sound/Grid/Pic-Sound Match (swap the
 npm install
 npm run dev
 ```
+
+Deploys to GitHub Pages automatically on push to `main`.

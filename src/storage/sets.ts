@@ -1,7 +1,15 @@
 import { edexcelUnit1Sets } from "../data/edexcelUnit1";
 import { exampleSets, type ExampleSet } from "../data/exampleSets";
 import { makeId } from "../lib/id";
-import type { AnySet, MatchSet, MatchTemplate, Pair, Side } from "../types";
+import type {
+  AnySet,
+  GridSet,
+  MatchSet,
+  MatchTemplate,
+  MultiChoiceSet,
+  Pair,
+  Side,
+} from "../types";
 import { base64ToBlob, blobToBase64, getMedia, putMedia } from "./media";
 
 const STORAGE_KEY = "cgamagic:textmatch:sets";
@@ -130,6 +138,41 @@ export function createSet(
   rightLabel: string,
 ): MatchSet {
   return createMatchSet(title, "text-match", leftLabel, rightLabel);
+}
+
+/** Starts a 3x3 grid — the smallest size that still makes a useful table. */
+export function createGridSet(title: string): GridSet {
+  const now = Date.now();
+  const set: GridSet = {
+    id: makeId(),
+    kind: "grid",
+    title,
+    rowHeaders: ["", "", ""],
+    colHeaders: ["", "", ""],
+    cells: [
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""],
+    ],
+    createdAt: now,
+    updatedAt: now,
+  };
+  writeAll([...readAll(), set]);
+  return set;
+}
+
+export function createMultiChoiceSet(title: string): MultiChoiceSet {
+  const now = Date.now();
+  const set: MultiChoiceSet = {
+    id: makeId(),
+    kind: "multichoice",
+    title,
+    questions: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+  writeAll([...readAll(), set]);
+  return set;
 }
 
 export function saveSet(set: AnySet): void {

@@ -2,7 +2,9 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   MATCH_TEMPLATE_KINDS,
+  createGridSet,
   createMatchSet,
+  createMultiChoiceSet,
   deleteSet,
   exportSet,
   importSet,
@@ -12,7 +14,74 @@ import {
 } from "../storage/sets";
 import type { AnySet, MatchTemplate } from "../types";
 
-const TEMPLATES = Object.keys(MATCH_TEMPLATE_KINDS) as MatchTemplate[];
+const MATCH_TEMPLATES = Object.keys(MATCH_TEMPLATE_KINDS) as MatchTemplate[];
+
+/** Templates that aren't match sets and so have their own authoring screens. */
+type OtherTemplate = "grid" | "multichoice";
+type TemplateChoice = MatchTemplate | OtherTemplate;
+
+const OTHER_TEMPLATES: Record<OtherTemplate, { name: string; blurb: string }> = {
+  grid: {
+    name: "Grid Match",
+    blurb:
+      "Row and column headers combine to prompt each answer — built for verb conjugation.",
+  },
+  multichoice: {
+    name: "Multi-Choice",
+    blurb: "Straight questions with several answers. Good for comprehension.",
+  },
+};
+
+function isMatchTemplate(t: TemplateChoice): t is MatchTemplate {
+  return t in MATCH_TEMPLATE_KINDS;
+}
+
+/** One-line description of a set for the list on the home screen. */
+function summarise(set: AnySet): string {
+  switch (set.kind) {
+    case "match": {
+      const n = set.pairs.length;
+      return `${MATCH_TEMPLATE_KINDS[set.template].name} · ${n} pair${
+        n === 1 ? "" : "s"
+      } · ${set.leftLabel} ↔ ${set.rightLabel}`;
+    }
+    case "grid":
+      return `Grid Match · ${set.rowHeaders.length} × ${set.colHeaders.length}`;
+    case "multichoice": {
+      const n = set.questions.length;
+      return `Multi-Choice · ${n} question${n === 1 ? "" : "s"}`;
+    }
+    default:
+      return "";
+  }
+}
+
+function TemplateCard({
+  name,
+  blurb,
+  selected,
+  onSelect,
+}: {
+  name: string;
+  blurb: string;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`text-left rounded-lg border-2 p-3 ${
+        selected
+          ? "border-blue-500 bg-blue-50"
+          : "border-slate-200 hover:border-slate-300"
+      }`}
+    >
+      <div className="font-semibold">{name}</div>
+      <div className="text-xs text-slate-500 mt-0.5">{blurb}</div>
+    </button>
+  );
+}
 
 /** Sensible starting labels per template, so the form isn't blank. */
 const DEFAULT_LABELS: Record<MatchTemplate, [string, string]> = {
@@ -26,7 +95,7 @@ export function Home() {
   const navigate = useNavigate();
   const [sets, setSets] = useState<AnySet[]>(() => listSets());
   const [showCreate, setShowCreate] = useState(false);
-  const [template, setTemplate] = useState<MatchTemplate>("text-match");
+  const [template, setTemplate] = useState<TemplateChoice>("text-match");
   const [title, setTitle] = useState("");
   const [leftLabel, setLeftLabel] = useState(DEFAULT_LABELS["text-match"][0]);
   const [rightLabel, setRightLabel] = useState(DEFAULT_LABELS["text-match"][1]);
@@ -38,11 +107,13 @@ export function Home() {
     setSets(listSets());
   }
 
-  function pickTemplate(next: MatchTemplate) {
+  function pickTemplate(next: TemplateChoice) {
     setTemplate(next);
-    const [l, r] = DEFAULT_LABELS[next];
-    setLeftLabel(l);
-    setRightLabel(r);
+    if (isMatchTemplate(next)) {
+      const [l, r] = DEFAULT_LABELS[next];
+      setLeftLabel(l);
+      setRightLabel(r);
+    }
   }
 
   function loadCollection(
@@ -59,12 +130,12 @@ export function Home() {
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    const set = createMatchSet(
-      title || "Untitled set",
-      template,
-      leftLabel,
-      rightLabel,
-    );
+    const name = title || "Untitled set";
+    const set = isMatchTemplate(template)
+      ? createMatchSet(name, template, leftLabel, rightLabel)
+      : template === "grid"
+        ? createGridSet(name)
+        : createMultiChoiceSet(name);
     navigate(`/edit/${set.id}`);
   }
 
@@ -160,24 +231,27 @@ export function Home() {
             <h2 className="font-semibold text-lg">New set</h2>
 
             <div className="grid sm:grid-cols-2 gap-3">
-              {TEMPLATES.map((t) => {
+              {MATCH_TEMPLATES.map((t) => {
                 const meta = MATCH_TEMPLATE_KINDS[t];
                 return (
-                  <button
+                  <TemplateCard
                     key={t}
-                    type="button"
-                    onClick={() => pickTemplate(t)}
-                    className={`text-left rounded-lg border-2 p-3 ${
-                      template === t
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-slate-200 hover:border-slate-300"
-                    }`}
-                  >
-                    <div className="font-semibold">{meta.name}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">{meta.blurb}</div>
-                  </button>
+                    name={meta.name}
+                    blurb={meta.blurb}
+                    selected={template === t}
+                    onSelect={() => pickTemplate(t)}
+                  />
                 );
               })}
+              {(Object.keys(OTHER_TEMPLATES) as OtherTemplate[]).map((t) => (
+                <TemplateCard
+                  key={t}
+                  name={OTHER_TEMPLATES[t].name}
+                  blurb={OTHER_TEMPLATES[t].blurb}
+                  selected={template === t}
+                  onSelect={() => pickTemplate(t)}
+                />
+              ))}
             </div>
 
             <label className="flex flex-col gap-1">
@@ -190,28 +264,30 @@ export function Home() {
                 placeholder="e.g. French Household Vocabulary"
               />
             </label>
-            <div className="grid grid-cols-2 gap-4">
-              <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-slate-600">
-                  Left label ({MATCH_TEMPLATE_KINDS[template].left})
-                </span>
-                <input
-                  value={leftLabel}
-                  onChange={(e) => setLeftLabel(e.target.value)}
-                  className="rounded border border-slate-300 px-3 py-2"
-                />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-slate-600">
-                  Right label ({MATCH_TEMPLATE_KINDS[template].right})
-                </span>
-                <input
-                  value={rightLabel}
-                  onChange={(e) => setRightLabel(e.target.value)}
-                  className="rounded border border-slate-300 px-3 py-2"
-                />
-              </label>
-            </div>
+            {isMatchTemplate(template) && (
+              <div className="grid grid-cols-2 gap-4">
+                <label className="flex flex-col gap-1">
+                  <span className="text-sm font-medium text-slate-600">
+                    Left label ({MATCH_TEMPLATE_KINDS[template].left})
+                  </span>
+                  <input
+                    value={leftLabel}
+                    onChange={(e) => setLeftLabel(e.target.value)}
+                    className="rounded border border-slate-300 px-3 py-2"
+                  />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-sm font-medium text-slate-600">
+                    Right label ({MATCH_TEMPLATE_KINDS[template].right})
+                  </span>
+                  <input
+                    value={rightLabel}
+                    onChange={(e) => setRightLabel(e.target.value)}
+                    className="rounded border border-slate-300 px-3 py-2"
+                  />
+                </label>
+              </div>
+            )}
             <div className="flex gap-3">
               <button
                 type="submit"
@@ -243,15 +319,7 @@ export function Home() {
             >
               <div className="min-w-0">
                 <h3 className="font-semibold truncate">{set.title}</h3>
-                <p className="text-sm text-slate-500">
-                  {set.kind === "match" && (
-                    <>
-                      {MATCH_TEMPLATE_KINDS[set.template].name} &middot;{" "}
-                      {set.pairs.length} pair{set.pairs.length === 1 ? "" : "s"}{" "}
-                      &middot; {set.leftLabel} ↔ {set.rightLabel}
-                    </>
-                  )}
-                </p>
+                <p className="text-sm text-slate-500">{summarise(set)}</p>
               </div>
               <div className="flex gap-2 shrink-0">
                 <button

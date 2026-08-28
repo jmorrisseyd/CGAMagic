@@ -9,6 +9,7 @@ import { Flashcards } from "./Flashcards";
 import { Football } from "./Football";
 import { Hangman } from "./Hangman";
 import { Invaders } from "./Invaders";
+import { MultiChoiceQuiz } from "./MultiChoiceQuiz";
 import { MultiMatch } from "./MultiMatch";
 import { Oxo } from "./Oxo";
 import { Pelmanism } from "./Pelmanism";
@@ -26,6 +27,14 @@ export function GamePage() {
   );
 
   if (!setId || !gameId || !set) return <Navigate to="/" replace />;
+
+  if (set.kind === "multichoice") {
+    return gameId === "multi-choice-quiz" ? (
+      <MultiChoiceQuiz set={set} />
+    ) : (
+      <Navigate to={`/play/${setId}/multi-choice-quiz`} replace />
+    );
+  }
 
   const playable = toPlayable(set);
   if (!playable) return <Navigate to={`/play/${setId}`} replace />;

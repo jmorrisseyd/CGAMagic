@@ -13,6 +13,11 @@ export function PlayMenu() {
 
   if (!setId || !set) return <Navigate to="/" replace />;
 
+  // Multi-Choice has a single bespoke activity, so skip the menu entirely.
+  if (set.kind === "multichoice") {
+    return <Navigate to={`/play/${setId}/multi-choice-quiz`} replace />;
+  }
+
   const playable = toPlayable(set);
   if (!playable) return <Navigate to={`/edit/${setId}`} replace />;
 
