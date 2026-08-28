@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { AccentBar } from "../components/AccentBar";
 import { SideView } from "../components/SideView";
 import type { PlayableSet } from "../lib/compile";
 import { shuffle } from "../lib/shuffle";
@@ -19,6 +20,7 @@ export function TypeGame({ set }: { set: PlayableSet }) {
   const [attemptedWrong, setAttemptedWrong] = useState(false);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const current = items[index];
   const promptSide = direction === "leftToRight" ? current?.left : current?.right;
@@ -99,11 +101,18 @@ export function TypeGame({ set }: { set: PlayableSet }) {
             {promptSide && <SideView side={promptSide} imageClassName="max-h-40" />}
           </div>
           <input
+            ref={inputRef}
             autoFocus
             value={value}
             onChange={(e) => setValue(e.target.value)}
             className="w-full rounded-lg border-2 border-slate-300 px-4 py-3 text-lg text-center focus:border-blue-400 outline-none"
             placeholder={`Type the ${typeLabel.toLowerCase()}...`}
+          />
+          <AccentBar
+            inputRef={inputRef}
+            value={value}
+            onChange={setValue}
+            includePunctuation
           />
           {attemptedWrong && (
             <div className="text-red-600 text-sm">Not quite — try again, or skip.</div>

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { AccentBar } from "../components/AccentBar";
 import { SideView } from "../components/SideView";
 import type { PlayableSet } from "../lib/compile";
 import { shuffle } from "../lib/shuffle";
@@ -44,6 +45,7 @@ export function Oxo({ set }: { set: PlayableSet }) {
   const [active, setActive] = useState<number | null>(null);
   const [value, setValue] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const winner = LINES.reduce<Team | null>((found, line) => {
     if (found) return found;
@@ -150,10 +152,17 @@ export function Oxo({ set }: { set: PlayableSet }) {
               <SideView side={cells[active].left} imageClassName="max-h-32" />
             </div>
             <input
+              ref={inputRef}
               autoFocus
               value={value}
               onChange={(e) => setValue(e.target.value)}
               className="w-full rounded-lg border-2 border-slate-300 px-4 py-3 text-lg text-center focus:border-blue-400 outline-none"
+            />
+            <AccentBar
+              inputRef={inputRef}
+              value={value}
+              onChange={setValue}
+              includePunctuation
             />
             <button
               type="submit"

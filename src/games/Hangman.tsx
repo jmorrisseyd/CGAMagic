@@ -1,20 +1,18 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { PlayableSet } from "../lib/compile";
+import { accentKeysFor, isTypedLetter, LETTER, QWERTY_ROWS } from "../lib/keyboard";
 import { sample } from "../lib/shuffle";
 import { isTextSide, sideText, type Pair } from "../types";
 import { GameShell } from "./GameShell";
 
 const MAX_WORDS = 16;
 const MAX_WRONG = 6;
-const ALPHABET = "abcdefghijklmnopqrstuvwxyz".split("");
-
 /**
  * Any Unicode letter is guessable. A hard-coded accent list used to miss
  * the Spanish acutes (á í ó ú) and ß/œ, which meant those characters were
  * treated as punctuation and revealed for free — giving part of the word
  * away. Punctuation like ¿ and ’ is still not a letter, so it stays shown.
  */
-const LETTER = /\p{L}/u;
 
 type Direction = "leftToRight" | "rightToLeft";
 
@@ -53,16 +51,12 @@ export function Hangman({ set }: { set: PlayableSet }) {
   const roundOver = won || lost;
   const allDone = index + 1 >= items.length && roundOver;
 
-  const accentedKeys = useMemo(() => {
-    const found = new Set<string>();
-    for (const pair of items) {
-      const text = (sideText(pair.left) + sideText(pair.right)).toLowerCase();
-      for (const ch of text) {
-        if (ch.charCodeAt(0) > 127 && LETTER.test(ch)) found.add(ch);
-      }
-    }
-    return [...found].sort();
-  }, [items]);
+  // Always the same keys regardless of the current word, so the palette
+  // can't hint at which letters the answer contains.
+  const accentedKeys = useMemo(
+    () => accentKeysFor(set.pairs.flatMap((p) => [sideText(p.left), sideText(p.right)])),
+    [set.pairs],
+  );
 
   function newGame(nextDirection: Direction = direction) {
     setDirection(nextDirection);
@@ -84,6 +78,35 @@ export function Hangman({ set }: { set: PlayableSet }) {
     setGuessed(next);
     if (!secretLetters.has(letter)) setWrong((w) => w + 1);
   }
+
+  // Typing on the real keyboard should just work — the on-screen keys are
+  // for the whiteboard. Held in a ref so the listener is attached once but
+  // always calls the current round's handlers.
+  const handlers = useRef({ guess, nextWord: () => {}, roundOver, allDone });
+  handlers.current = { guess, nextWord, roundOver, allDone };
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null;
+      // Don't hijack typing if focus is in a field somewhere.
+      if (target && /^(INPUT|TEXTAREA)$/.test(target.tagName)) return;
+
+      const { guess: doGuess, nextWord: doNext, roundOver: over, allDone: done } =
+        handlers.current;
+
+      if (over && !done && (e.key === "Enter" || e.key === " ")) {
+        e.preventDefault();
+        doNext();
+        return;
+      }
+      if (over) return;
+      if (!isTypedLetter(e)) return;
+      e.preventDefault();
+      doGuess(e.key.toLowerCase());
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   function nextWord() {
     if (won) setSaved((s) => s + 1);
@@ -163,16 +186,42 @@ export function Hangman({ set }: { set: PlayableSet }) {
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-2">
-                <div className="flex flex-wrap gap-1 justify-center max-w-md">
-                  {ALPHABET.map((l) => (
-                    <LetterButton key={l} letter={l} guessed={guessed} onGuess={guess} secretLetters={secretLetters} />
+              <div className="flex flex-col items-center gap-3">
+                <p className="text-xs text-slate-400">
+                  Type on your keyboard, or tap the keys below
+                </p>
+                {/* QWERTY, staggered like a real keyboard, so students can
+                    find letters by muscle memory rather than reading. */}
+                <div className="flex flex-col items-center gap-1">
+                  {QWERTY_ROWS.map((row, r) => (
+                    <div
+                      key={r}
+                      className="flex gap-1 justify-center"
+                      style={{ paddingLeft: `${r * 1.1}rem` }}
+                    >
+                      {row.split("").map((l) => (
+                        <LetterButton
+                          key={l}
+                          letter={l}
+                          guessed={guessed}
+                          onGuess={guess}
+                          secretLetters={secretLetters}
+                        />
+                      ))}
+                    </div>
                   ))}
                 </div>
                 {accentedKeys.length > 0 && (
-                  <div className="flex flex-wrap gap-1 justify-center max-w-md">
+                  <div className="flex flex-wrap gap-1 justify-center max-w-md border-t border-slate-200 pt-3">
                     {accentedKeys.map((l) => (
-                      <LetterButton key={l} letter={l} guessed={guessed} onGuess={guess} secretLetters={secretLetters} />
+                      <LetterButton
+                        key={l}
+                        letter={l}
+                        guessed={guessed}
+                        onGuess={guess}
+                        secretLetters={secretLetters}
+                        uppercase={false}
+                      />
                     ))}
                   </div>
                 )}
@@ -190,11 +239,14 @@ function LetterButton({
   guessed,
   onGuess,
   secretLetters,
+  uppercase = true,
 }: {
   letter: string;
   guessed: Set<string>;
   onGuess: (l: string) => void;
   secretLetters: Set<string>;
+  /** Accent keys stay lowercase: CSS uppercase turns ß into "SS". */
+  uppercase?: boolean;
 }) {
   const isGuessed = guessed.has(letter);
   const correct = isGuessed && secretLetters.has(letter);
@@ -202,7 +254,7 @@ function LetterButton({
     <button
       onClick={() => onGuess(letter)}
       disabled={isGuessed}
-      className={`w-8 h-8 rounded text-sm font-semibold uppercase ${
+      className={`w-8 h-8 rounded text-sm font-semibold ${uppercase ? "uppercase" : ""} ${
         isGuessed
           ? correct
             ? "bg-green-200 text-green-700"

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { AccentBar } from "../components/AccentBar";
 import { SideView } from "../components/SideView";
 import type { PlayableSet } from "../lib/compile";
 import { shuffle } from "../lib/shuffle";
@@ -37,6 +38,7 @@ export function Trainer({ set }: { set: PlayableSet }) {
   const [feedback, setFeedback] = useState<"right" | "wrong" | null>(null);
   const [revealed, setRevealed] = useState(0);
   const [done, setDone] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const current = items[index];
   const promptSide = direction === "leftToRight" ? current?.left : current?.right;
@@ -214,6 +216,7 @@ export function Trainer({ set }: { set: PlayableSet }) {
         )}
 
         <input
+          ref={inputRef}
           autoFocus
           value={value}
           onChange={(e) => setValue(e.target.value)}
@@ -225,6 +228,13 @@ export function Trainer({ set }: { set: PlayableSet }) {
                 : "border-slate-300 focus:border-blue-400"
           }`}
           placeholder="Type your answer..."
+        />
+
+        <AccentBar
+          inputRef={inputRef}
+          value={value}
+          onChange={setValue}
+          includePunctuation
         />
 
         {feedback === "wrong" && (
