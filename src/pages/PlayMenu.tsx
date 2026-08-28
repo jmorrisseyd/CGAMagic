@@ -34,12 +34,20 @@ export function PlayMenu() {
           </div>
           <h1 className="text-xl font-bold truncate">{set.title}</h1>
         </div>
-        <Link
-          to="/"
-          className="shrink-0 rounded bg-slate-600 hover:bg-slate-500 px-3 py-2 text-sm font-medium"
-        >
-          ← All sets
-        </Link>
+        <div className="flex gap-2 shrink-0">
+          <Link
+            to={`/worksheets/${setId}`}
+            className="rounded bg-slate-600 hover:bg-slate-500 px-3 py-2 text-sm font-medium"
+          >
+            🖨 Worksheets
+          </Link>
+          <Link
+            to="/"
+            className="rounded bg-slate-600 hover:bg-slate-500 px-3 py-2 text-sm font-medium"
+          >
+            ← All sets
+          </Link>
+        </div>
       </header>
 
       <main className="max-w-3xl mx-auto p-6">

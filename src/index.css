@@ -9,3 +9,55 @@ body,
 body {
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
 }
+
+/*
+ * Worksheet printing. The app chrome (headers, option panels, buttons) is
+ * marked .no-print and dropped; the sheet itself prints edge to edge in
+ * black on white so it photocopies cleanly.
+ */
+@media print {
+  @page {
+    margin: 12mm;
+  }
+
+  html,
+  body,
+  #root {
+    height: auto;
+    background: #fff !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-area {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+    background: #fff !important;
+  }
+
+  /* Keep an activity from splitting across a page where it would confuse. */
+  .print-keep {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-break {
+    break-after: page;
+    page-break-after: always;
+  }
+
+  /* Cut-out cards and grids need visible rules when printed. */
+  .print-rule {
+    border-color: #000 !important;
+  }
+
+  .print-ink {
+    color: #000 !important;
+  }
+}
