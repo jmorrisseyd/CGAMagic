@@ -27,7 +27,7 @@ export function PlayMenu() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <header className="bg-slate-800 text-white px-6 py-4 flex items-center justify-between">
+      <header className="bg-cga-900 text-white px-6 py-4 flex items-center justify-between">
         <div className="min-w-0">
           <div className="text-xs uppercase tracking-wide text-slate-300">
             {set.kind === "grid" ? "Grid Match" : "Match"}
@@ -64,7 +64,7 @@ export function PlayMenu() {
               <div
                 className={`h-full rounded-xl p-5 border ${
                   enabled
-                    ? "bg-white border-slate-200 hover:border-blue-400 hover:shadow"
+                    ? "bg-white border-slate-200 hover:border-cga-400 hover:shadow"
                     : "bg-slate-50 border-slate-200 opacity-60 cursor-not-allowed"
                 }`}
               >

@@ -103,7 +103,7 @@ function AudioButton({
         type="button"
         onClick={play}
         className={`rounded-full w-12 h-12 flex items-center justify-center text-xl shadow shrink-0 ${
-          playing ? "bg-blue-500 text-white" : "bg-white hover:bg-slate-100"
+          playing ? "bg-cga-500 text-white" : "bg-white hover:bg-slate-100"
         }`}
         aria-label={label ? `Play ${label}` : "Play sound"}
       >

@@ -87,7 +87,7 @@ export function Pelmanism({ set }: { set: PlayableSet }) {
           <button
             onClick={() => newGame("1p")}
             className={`px-3 py-1 rounded text-sm font-medium ${
-              mode === "1p" ? "bg-blue-600 text-white" : "bg-white text-slate-600 border"
+              mode === "1p" ? "bg-cga-600 text-white" : "bg-white text-slate-600 border"
             }`}
           >
             1 Player
@@ -95,7 +95,7 @@ export function Pelmanism({ set }: { set: PlayableSet }) {
           <button
             onClick={() => newGame("2p")}
             className={`px-3 py-1 rounded text-sm font-medium ${
-              mode === "2p" ? "bg-blue-600 text-white" : "bg-white text-slate-600 border"
+              mode === "2p" ? "bg-cga-600 text-white" : "bg-white text-slate-600 border"
             }`}
           >
             2 Players
@@ -113,7 +113,7 @@ export function Pelmanism({ set }: { set: PlayableSet }) {
             </div>
             <button
               onClick={() => newGame(mode)}
-              className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
+              className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
             >
               Play again
             </button>
@@ -136,9 +136,9 @@ export function Pelmanism({ set }: { set: PlayableSet }) {
                     disabled={matched.has(c.pairId)}
                     className={`w-24 h-20 rounded-lg font-medium text-sm p-2 flex items-center justify-center text-center ${
                       matched.has(c.pairId)
-                        ? "bg-green-100 text-green-800"
+                        ? "bg-leaf-100 text-leaf-800"
                         : isFlipped
-                          ? "bg-white border-2 border-blue-400"
+                          ? "bg-white border-2 border-cga-400"
                           : "bg-slate-700 hover:bg-slate-600 text-white"
                     }`}
                   >

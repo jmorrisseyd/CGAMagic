@@ -115,7 +115,7 @@ export function TrueOrFalse({ set }: { set: PlayableSet }) {
       {!started ? (
         <button
           onClick={() => setStarted(true)}
-          className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-8 py-4 text-lg"
+          className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-8 py-4 text-lg"
         >
           Start — {SECONDS}s per pairing
         </button>
@@ -127,7 +127,7 @@ export function TrueOrFalse({ set }: { set: PlayableSet }) {
           </div>
           <button
             onClick={newGame}
-            className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
+            className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
           >
             Play again
           </button>
@@ -141,7 +141,7 @@ export function TrueOrFalse({ set }: { set: PlayableSet }) {
           <div
             className={`w-full rounded-xl px-8 py-8 flex items-center justify-center gap-8 text-2xl font-bold ${
               flash === "right"
-                ? "bg-green-100"
+                ? "bg-leaf-100"
                 : flash === "wrong"
                   ? "bg-red-100"
                   : flash === "timeout"
@@ -171,7 +171,7 @@ export function TrueOrFalse({ set }: { set: PlayableSet }) {
               </button>
               <button
                 onClick={() => resolve(true)}
-                className="rounded-lg bg-green-100 hover:bg-green-200 text-green-700 font-bold px-10 py-5 text-xl"
+                className="rounded-lg bg-leaf-100 hover:bg-leaf-200 text-leaf-700 font-bold px-10 py-5 text-xl"
               >
                 ✓ True
               </button>

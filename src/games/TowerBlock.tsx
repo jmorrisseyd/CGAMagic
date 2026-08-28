@@ -106,7 +106,7 @@ export function TowerBlock({ set }: { set: PlayableSet }) {
               </div>
               <button
                 onClick={newGame}
-                className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
+                className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
               >
                 Play again
               </button>
@@ -119,7 +119,7 @@ export function TowerBlock({ set }: { set: PlayableSet }) {
               <div
                 className={`text-2xl font-bold text-center px-6 py-4 rounded-lg w-full ${
                   flash === "correct"
-                    ? "bg-green-100"
+                    ? "bg-leaf-100"
                     : flash === "wrong"
                       ? "bg-red-100"
                       : "bg-white shadow"

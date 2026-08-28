@@ -87,7 +87,7 @@ export function Flashcards({ set }: { set: PlayableSet }) {
                 </button>
                 <button
                   onClick={() => advance(true)}
-                  className="rounded-lg bg-green-100 hover:bg-green-200 text-green-700 font-semibold px-6 py-3"
+                  className="rounded-lg bg-leaf-100 hover:bg-leaf-200 text-leaf-700 font-semibold px-6 py-3"
                 >
                   ✓ Knew it
                 </button>
@@ -117,7 +117,7 @@ function Summary({
       </div>
       <button
         onClick={onRestart}
-        className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
+        className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
       >
         Restart
       </button>

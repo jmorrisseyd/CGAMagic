@@ -70,7 +70,7 @@ export function MultiMatch({ set }: { set: PlayableSet }) {
           </div>
           <button
             onClick={restart}
-            className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
+            className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
           >
             Play again
           </button>

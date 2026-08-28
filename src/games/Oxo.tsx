@@ -107,7 +107,7 @@ export function Oxo({ set }: { set: PlayableSet }) {
             </div>
             <button
               onClick={newGame}
-              className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
+              className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
             >
               Play again
             </button>
@@ -125,7 +125,7 @@ export function Oxo({ set }: { set: PlayableSet }) {
                   disabled={!!owner[i] || active !== null}
                   className={`w-28 h-28 rounded-lg flex items-center justify-center p-2 text-center font-semibold ${
                     owner[i] === "X"
-                      ? "bg-blue-200 text-blue-900 text-5xl"
+                      ? "bg-cga-200 text-cga-900 text-5xl"
                       : owner[i] === "O"
                         ? "bg-rose-200 text-rose-900 text-5xl"
                         : "bg-white hover:bg-slate-50 border-2 border-slate-300 text-sm"
@@ -156,7 +156,7 @@ export function Oxo({ set }: { set: PlayableSet }) {
               autoFocus
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              className="w-full rounded-lg border-2 border-slate-300 px-4 py-3 text-lg text-center focus:border-blue-400 outline-none"
+              className="w-full rounded-lg border-2 border-slate-300 px-4 py-3 text-lg text-center focus:border-cga-400 outline-none"
             />
             <AccentBar
               inputRef={inputRef}
@@ -166,7 +166,7 @@ export function Oxo({ set }: { set: PlayableSet }) {
             />
             <button
               type="submit"
-              className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-2"
+              className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-2"
             >
               Submit
             </button>

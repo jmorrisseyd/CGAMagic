@@ -80,7 +80,7 @@ export function TypeGame({ set }: { set: PlayableSet }) {
           </div>
           <button
             onClick={() => restart()}
-            className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
+            className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
           >
             Restart
           </button>
@@ -105,7 +105,7 @@ export function TypeGame({ set }: { set: PlayableSet }) {
             autoFocus
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            className="w-full rounded-lg border-2 border-slate-300 px-4 py-3 text-lg text-center focus:border-blue-400 outline-none"
+            className="w-full rounded-lg border-2 border-slate-300 px-4 py-3 text-lg text-center focus:border-cga-400 outline-none"
             placeholder={`Type the ${typeLabel.toLowerCase()}...`}
           />
           <AccentBar
@@ -127,7 +127,7 @@ export function TypeGame({ set }: { set: PlayableSet }) {
             </button>
             <button
               type="submit"
-              className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-2"
+              className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-2"
             >
               Check
             </button>

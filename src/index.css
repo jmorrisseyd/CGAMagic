@@ -1,5 +1,42 @@
 @import "tailwindcss";
 
+/*
+ * Chestnut Grove Academy's palette, sampled from chestnutgrove.org.uk:
+ * a deep forest green (#167c4e) used across their headings, borders and
+ * fills, a bright lime (#73be45) for highlights, and #0a3824 as the
+ * darkest tone.
+ *
+ * Two ramps rather than one, because the brand greens sit at genuinely
+ * different hues (forest ~153°, lime ~97°). Forest carries the chrome —
+ * buttons, selection, focus — and lime carries "correct" feedback in the
+ * games, so a right answer never reads as just another button.
+ */
+@theme {
+  --color-cga-50: #f2faf6;
+  --color-cga-100: #e3f5ed;
+  --color-cga-200: #c9ebdc;
+  --color-cga-300: #9ed9be;
+  --color-cga-400: #5fc798;
+  --color-cga-500: #28ab70;
+  --color-cga-600: #167c4e;
+  --color-cga-700: #116740;
+  --color-cga-800: #0d5133;
+  --color-cga-900: #0a3824;
+  --color-cga-950: #052617;
+
+  --color-leaf-50: #f5fbf1;
+  --color-leaf-100: #e9f7e1;
+  --color-leaf-200: #d5eec6;
+  --color-leaf-300: #b9e1a0;
+  --color-leaf-400: #9dd879;
+  --color-leaf-500: #73be45;
+  --color-leaf-600: #5ca430;
+  /* Darkened from the ramp's natural value so "correct" text clears
+     WCAG AA (4.5:1) against its own pale tint. */
+  --color-leaf-700: #417c1d;
+  --color-leaf-800: #38651d;
+}
+
 html,
 body,
 #root {

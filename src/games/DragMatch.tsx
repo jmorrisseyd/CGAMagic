@@ -148,12 +148,12 @@ export function DragMatch({ set }: { set: PlayableSet }) {
               <button
                 onClick={check}
                 disabled={pool.length > 0}
-                className="rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-slate-300 text-white font-semibold px-6 py-3"
+                className="rounded-lg bg-cga-600 hover:bg-cga-700 disabled:bg-slate-300 text-white font-semibold px-6 py-3"
               >
                 Check
               </button>
             ) : hasLastBatch ? (
-              <div className="text-xl font-bold text-green-700">
+              <div className="text-xl font-bold text-leaf-700">
                 All batches complete! 🎉
               </div>
             ) : (
@@ -162,7 +162,7 @@ export function DragMatch({ set }: { set: PlayableSet }) {
                   setBatchIndex((i) => i + 1);
                   resetBatch(batchIndex + 1);
                 }}
-                className="rounded-lg bg-green-600 hover:bg-green-500 text-white font-semibold px-6 py-3"
+                className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
               >
                 Next batch →
               </button>
@@ -213,11 +213,11 @@ function Slot({
   const base = "rounded-lg px-4 py-3 border-2 border-dashed min-h-12 flex items-center justify-between";
   const color =
     state === "correct"
-      ? "bg-green-100 border-green-400"
+      ? "bg-leaf-100 border-leaf-400"
       : state === "wrong"
         ? "bg-red-100 border-red-400"
         : isOver
-          ? "bg-blue-50 border-blue-400"
+          ? "bg-cga-50 border-cga-400"
           : "bg-white border-slate-300";
   return (
     <div ref={setNodeRef} className={`${base} ${color}`}>

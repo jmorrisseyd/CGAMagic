@@ -74,7 +74,7 @@ function TemplateCard({
       onClick={onSelect}
       className={`text-left rounded-lg border-2 p-3 ${
         selected
-          ? "border-blue-500 bg-blue-50"
+          ? "border-cga-600 bg-cga-50"
           : "border-slate-200 hover:border-slate-300"
       }`}
     >
@@ -199,7 +199,7 @@ export function Home() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <header className="bg-slate-800 text-white px-6 py-5">
+      <header className="bg-cga-900 text-white px-6 py-5">
         <h1 className="text-2xl font-bold">CGAMagic</h1>
         <p className="text-slate-300 text-sm">MFL classroom activities</p>
       </header>
@@ -208,7 +208,7 @@ export function Home() {
         <div className="flex gap-3 flex-wrap">
           <button
             onClick={() => setShowCreate(true)}
-            className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-5 py-2.5"
+            className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-5 py-2.5"
           >
             + New set
           </button>
@@ -318,7 +318,7 @@ export function Home() {
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-5 py-2"
+                className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-5 py-2"
               >
                 Create &amp; edit →
               </button>
@@ -351,7 +351,7 @@ export function Home() {
               <div className="flex gap-2 shrink-0">
                 <button
                   onClick={() => navigate(`/play/${set.id}`)}
-                  className="rounded bg-green-600 hover:bg-green-500 text-white text-sm font-medium px-3 py-2"
+                  className="rounded bg-cga-600 hover:bg-cga-700 text-white text-sm font-medium px-3 py-2"
                 >
                   Play
                 </button>

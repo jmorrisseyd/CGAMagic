@@ -125,7 +125,7 @@ export function Trainer({ set }: { set: PlayableSet }) {
           <div className="flex gap-4">
             <button
               onClick={() => start("practice")}
-              className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-4"
+              className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-4"
             >
               Practice
               <div className="text-xs font-normal opacity-80">Hints and retries</div>
@@ -154,7 +154,7 @@ export function Trainer({ set }: { set: PlayableSet }) {
           <div className="w-full bg-white rounded-xl shadow divide-y print:shadow-none">
             {results.map((r, i) => (
               <div key={i} className="flex items-center gap-3 px-4 py-2 text-sm">
-                <span className={r.correct ? "text-green-600" : "text-red-600"}>
+                <span className={r.correct ? "text-leaf-700" : "text-red-600"}>
                   {r.correct ? "✓" : "✗"}
                 </span>
                 <span className="flex-1">
@@ -181,7 +181,7 @@ export function Trainer({ set }: { set: PlayableSet }) {
             </button>
             <button
               onClick={() => setStarted(false)}
-              className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
+              className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
             >
               Again
             </button>
@@ -222,10 +222,10 @@ export function Trainer({ set }: { set: PlayableSet }) {
           onChange={(e) => setValue(e.target.value)}
           className={`w-full rounded-lg border-2 px-4 py-3 text-lg text-center outline-none ${
             feedback === "right"
-              ? "border-green-400 bg-green-50"
+              ? "border-leaf-400 bg-leaf-50"
               : feedback === "wrong"
                 ? "border-red-400 bg-red-50"
-                : "border-slate-300 focus:border-blue-400"
+                : "border-slate-300 focus:border-cga-400"
           }`}
           placeholder="Type your answer..."
         />
@@ -260,7 +260,7 @@ export function Trainer({ set }: { set: PlayableSet }) {
           </button>
           <button
             type="submit"
-            className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-2"
+            className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-2"
           >
             {mode === "test" ? "Next" : "Check"}
           </button>

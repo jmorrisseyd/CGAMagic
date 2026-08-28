@@ -16,7 +16,7 @@ export function GameShell({
 }) {
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col">
-      <header className="bg-slate-800 text-white px-4 py-3 flex items-center justify-between gap-4">
+      <header className="bg-cga-900 text-white px-4 py-3 flex items-center justify-between gap-4">
         <div className="min-w-0">
           <div className="text-xs uppercase tracking-wide text-slate-300">
             {setTitle}

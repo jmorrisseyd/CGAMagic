@@ -110,7 +110,7 @@ export function ThreeInARow({ set }: { set: PlayableSet }) {
               onClick={() => newGame(s)}
               className={`px-3 py-1 rounded text-sm font-medium ${
                 s === size
-                  ? "bg-blue-600 text-white"
+                  ? "bg-cga-600 text-white"
                   : "bg-white text-slate-600 border"
               }`}
             >
@@ -131,7 +131,7 @@ export function ThreeInARow({ set }: { set: PlayableSet }) {
             </div>
             <button
               onClick={() => newGame(size)}
-              className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
+              className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
             >
               Play again
             </button>
@@ -154,7 +154,7 @@ export function ThreeInARow({ set }: { set: PlayableSet }) {
                     disabled={!!cellOwner}
                     className={`w-24 h-24 rounded-lg font-semibold text-sm flex items-center justify-center p-2 text-center ${
                       cellOwner === "A"
-                        ? "bg-blue-200 text-blue-900"
+                        ? "bg-cga-200 text-cga-900"
                         : cellOwner === "B"
                           ? "bg-rose-200 text-rose-900"
                           : "bg-white hover:bg-slate-50 border-2 border-slate-300"

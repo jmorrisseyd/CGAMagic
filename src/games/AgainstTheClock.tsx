@@ -96,7 +96,7 @@ export function AgainstTheClock({ set }: { set: PlayableSet }) {
         {!started ? (
           <button
             onClick={start}
-            className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-8 py-4 text-lg"
+            className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-8 py-4 text-lg"
           >
             Start ({totalTime}s)
           </button>
@@ -110,7 +110,7 @@ export function AgainstTheClock({ set }: { set: PlayableSet }) {
             </div>
             <button
               onClick={newGame}
-              className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
+              className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
             >
               Play again
             </button>
@@ -125,9 +125,9 @@ export function AgainstTheClock({ set }: { set: PlayableSet }) {
                   disabled={matched.has(p.id)}
                   className={`rounded-lg px-4 py-3 font-medium text-left ${
                     matched.has(p.id)
-                      ? "bg-green-100 text-green-700"
+                      ? "bg-leaf-100 text-leaf-700"
                       : selectedLeft === p.id
-                        ? "bg-blue-500 text-white"
+                        ? "bg-cga-500 text-white"
                         : wrongFlash?.left === p.id
                           ? "bg-red-200"
                           : "bg-white hover:bg-slate-50 shadow"
@@ -145,7 +145,7 @@ export function AgainstTheClock({ set }: { set: PlayableSet }) {
                   disabled={matched.has(p.id)}
                   className={`rounded-lg px-4 py-3 font-medium text-left ${
                     matched.has(p.id)
-                      ? "bg-green-100 text-green-700"
+                      ? "bg-leaf-100 text-leaf-700"
                       : wrongFlash?.right === p.id
                         ? "bg-red-200"
                         : "bg-white hover:bg-slate-50 shadow"

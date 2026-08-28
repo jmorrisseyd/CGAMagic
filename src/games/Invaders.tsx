@@ -126,7 +126,7 @@ export function Invaders({ set }: { set: PlayableSet }) {
               <button
                 key={level}
                 onClick={() => start(level)}
-                className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 capitalize"
+                className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3 capitalize"
               >
                 {level}
               </button>
@@ -139,7 +139,7 @@ export function Invaders({ set }: { set: PlayableSet }) {
           <div className="text-lg text-slate-600">You scored {score}.</div>
           <button
             onClick={() => start(difficulty)}
-            className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
+            className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
           >
             Play again
           </button>
@@ -149,7 +149,7 @@ export function Invaders({ set }: { set: PlayableSet }) {
           <div
             className={`relative w-full h-72 rounded-xl overflow-hidden border-4 ${
               flash === "hit"
-                ? "border-green-400 bg-green-50"
+                ? "border-leaf-400 bg-leaf-50"
                 : flash === "miss"
                   ? "border-red-400 bg-red-50"
                   : "border-slate-700 bg-slate-900"

@@ -79,7 +79,7 @@ export function Worksheets() {
 
   return (
     <div className="min-h-screen bg-slate-100 print:bg-white">
-      <header className="bg-slate-800 text-white px-6 py-4 flex items-center justify-between no-print">
+      <header className="bg-cga-900 text-white px-6 py-4 flex items-center justify-between no-print">
         <div className="min-w-0">
           <div className="text-xs uppercase tracking-wide text-slate-300">
             Worksheets
@@ -111,7 +111,7 @@ export function Worksheets() {
                 onClick={() => setSelected(w.id)}
                 className={`text-left rounded-lg border-2 p-3 ${
                   selected === w.id
-                    ? "border-blue-500 bg-blue-50"
+                    ? "border-cga-600 bg-cga-50"
                     : "border-slate-200 hover:border-slate-300"
                 }`}
               >
@@ -163,7 +163,7 @@ export function Worksheets() {
             <button
               onClick={() => window.print()}
               disabled={blocked}
-              className="ml-auto rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-slate-300 text-white font-semibold px-5 py-2"
+              className="ml-auto rounded-lg bg-cga-600 hover:bg-cga-700 disabled:bg-slate-300 text-white font-semibold px-5 py-2"
             >
               Print
             </button>

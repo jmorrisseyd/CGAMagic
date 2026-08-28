@@ -97,19 +97,19 @@ export function Editor() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <header className="bg-slate-800 text-white px-6 py-4 flex items-center justify-between">
+      <header className="bg-cga-900 text-white px-6 py-4 flex items-center justify-between">
         <h1 className="text-xl font-bold">Edit set</h1>
         <div className="flex items-center gap-3">
-          {savedFlash && <span className="text-green-300 text-sm">Saved ✓</span>}
+          {savedFlash && <span className="text-leaf-300 text-sm">Saved ✓</span>}
           <button
             onClick={save}
-            className="rounded bg-blue-600 hover:bg-blue-500 px-3 py-2 text-sm font-medium"
+            className="rounded bg-cga-600 hover:bg-cga-700 px-3 py-2 text-sm font-medium"
           >
             Save
           </button>
           <button
             onClick={playNow}
-            className="rounded bg-green-600 hover:bg-green-500 px-3 py-2 text-sm font-medium"
+            className="rounded bg-cga-600 hover:bg-cga-700 px-3 py-2 text-sm font-medium"
           >
             Save &amp; Play →
           </button>
@@ -222,7 +222,7 @@ export function Editor() {
             <button
               onClick={addBulk}
               disabled={!bulk.trim()}
-              className="self-start rounded bg-blue-600 hover:bg-blue-500 disabled:bg-slate-300 text-white px-4 py-2 text-sm font-medium"
+              className="self-start rounded bg-cga-600 hover:bg-cga-700 disabled:bg-slate-300 text-white px-4 py-2 text-sm font-medium"
             >
               Add lines
             </button>

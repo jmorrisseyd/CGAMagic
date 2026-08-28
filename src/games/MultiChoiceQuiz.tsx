@@ -37,7 +37,7 @@ export function MultiChoiceQuiz({ set }: { set: MultiChoiceSet }) {
           </p>
           <Link
             to={`/edit/${set.id}`}
-            className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
+            className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
           >
             Add questions →
           </Link>
@@ -83,7 +83,7 @@ export function MultiChoiceQuiz({ set }: { set: MultiChoiceSet }) {
           </div>
           <button
             onClick={restart}
-            className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
+            className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
           >
             Play again
           </button>
@@ -107,7 +107,7 @@ export function MultiChoiceQuiz({ set }: { set: MultiChoiceSet }) {
                   disabled={revealed}
                   className={`rounded-lg px-5 py-4 font-medium text-lg text-left ${
                     revealed && isCorrect
-                      ? "bg-green-100 text-green-800"
+                      ? "bg-leaf-100 text-leaf-800"
                       : revealed && picked === optionIndex
                         ? "bg-red-100 text-red-800"
                         : "bg-white hover:bg-slate-50 shadow"

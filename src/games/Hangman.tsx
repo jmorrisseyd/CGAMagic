@@ -138,7 +138,7 @@ export function Hangman({ set }: { set: PlayableSet }) {
             </div>
             <button
               onClick={() => newGame()}
-              className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
+              className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
             >
               Play again
             </button>
@@ -175,12 +175,12 @@ export function Hangman({ set }: { set: PlayableSet }) {
 
             {roundOver ? (
               <div className="flex flex-col items-center gap-3">
-                <div className={`text-xl font-bold ${won ? "text-green-700" : "text-red-700"}`}>
+                <div className={`text-xl font-bold ${won ? "text-leaf-700" : "text-red-700"}`}>
                   {won ? "Saved! 🎉" : `Hanged! The word was "${secret}"`}
                 </div>
                 <button
                   onClick={nextWord}
-                  className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3"
+                  className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
                 >
                   Next word →
                 </button>
@@ -257,7 +257,7 @@ function LetterButton({
       className={`w-8 h-8 rounded text-sm font-semibold ${uppercase ? "uppercase" : ""} ${
         isGuessed
           ? correct
-            ? "bg-green-200 text-green-700"
+            ? "bg-leaf-200 text-leaf-700"
             : "bg-red-200 text-red-700"
           : "bg-white hover:bg-slate-100 shadow"
       }`}
