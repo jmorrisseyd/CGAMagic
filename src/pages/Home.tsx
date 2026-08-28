@@ -4,6 +4,7 @@ import {
   MATCH_TEMPLATE_KINDS,
   createGridSet,
   createMatchSet,
+  createMixGapSet,
   createMultiChoiceSet,
   deleteSet,
   exportSet,
@@ -18,7 +19,7 @@ import type { AnySet, MatchTemplate } from "../types";
 const MATCH_TEMPLATES = Object.keys(MATCH_TEMPLATE_KINDS) as MatchTemplate[];
 
 /** Templates that aren't match sets and so have their own authoring screens. */
-type OtherTemplate = "grid" | "multichoice";
+type OtherTemplate = "grid" | "multichoice" | "mixgap";
 type TemplateChoice = MatchTemplate | OtherTemplate;
 
 const OTHER_TEMPLATES: Record<OtherTemplate, { name: string; blurb: string }> = {
@@ -30,6 +31,11 @@ const OTHER_TEMPLATES: Record<OtherTemplate, { name: string; blurb: string }> = 
   multichoice: {
     name: "Multi-Choice",
     blurb: "Straight questions with several answers. Good for comprehension.",
+  },
+  mixgap: {
+    name: "Mix & Gap",
+    blurb:
+      "One passage, rebuilt and gapped a dozen ways — tiles, jumbles, gap-fill and comprehension.",
   },
 };
 
@@ -51,6 +57,12 @@ function summarise(set: AnySet): string {
     case "multichoice": {
       const n = set.questions.length;
       return `Multi-Choice · ${n} question${n === 1 ? "" : "s"}`;
+    }
+    case "mixgap": {
+      const n = set.text.trim() ? set.text.trim().split(/\s+/).length : 0;
+      return `Mix & Gap · ${n} word${n === 1 ? "" : "s"} · ${set.gaps.length} gap${
+        set.gaps.length === 1 ? "" : "s"
+      }`;
     }
     default:
       return "";
@@ -136,7 +148,9 @@ export function Home() {
       ? createMatchSet(name, template, leftLabel, rightLabel)
       : template === "grid"
         ? createGridSet(name)
-        : createMultiChoiceSet(name);
+        : template === "mixgap"
+          ? createMixGapSet(name)
+          : createMultiChoiceSet(name);
     navigate(`/edit/${set.id}`);
   }
 

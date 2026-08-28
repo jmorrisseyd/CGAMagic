@@ -19,6 +19,11 @@ import { Trainer } from "./Trainer";
 import { TrueOrFalse } from "./TrueOrFalse";
 import { TypeGame } from "./TypeGame";
 import { gameInfo } from "./registry";
+import { Anagrams, SpaceGame } from "../mixgap/SpaceAndAnagrams";
+import { Comprehension, FindIt } from "../mixgap/FindItAndComprehension";
+import { Gaps } from "../mixgap/Gaps";
+import { NextWord, OneInThree, TextMix } from "../mixgap/Reconstruct";
+import { Tile } from "../mixgap/Tile";
 
 export function GamePage() {
   const { setId, gameId } = useParams<{ setId: string; gameId: string }>();
@@ -27,6 +32,25 @@ export function GamePage() {
   );
 
   if (!setId || !gameId || !set) return <Navigate to="/" replace />;
+
+  if (set.kind === "mixgap") {
+    switch (gameId) {
+      case "tile-3": return <Tile set={set} size={3} />;
+      case "tile-4": return <Tile set={set} size={4} />;
+      case "tile-5": return <Tile set={set} size={5} />;
+      case "text-mix": return <TextMix set={set} />;
+      case "next-word": return <NextWord set={set} />;
+      case "one-in-three": return <OneInThree set={set} />;
+      case "space": return <SpaceGame set={set} />;
+      case "anagrams": return <Anagrams set={set} />;
+      case "gap-fill": return <Gaps set={set} mode="gap-fill" />;
+      case "multi-gaps": return <Gaps set={set} mode="multi-gaps" />;
+      case "write-gaps": return <Gaps set={set} mode="write-gaps" />;
+      case "find-it": return <FindIt set={set} />;
+      case "comprehension": return <Comprehension set={set} />;
+      default: return <Navigate to={`/play/${setId}`} replace />;
+    }
+  }
 
   if (set.kind === "multichoice") {
     return gameId === "multi-choice-quiz" ? (

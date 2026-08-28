@@ -7,6 +7,7 @@ import type {
   GridSet,
   MatchSet,
   MatchTemplate,
+  MixGapSet,
   MultiChoiceSet,
   Pair,
   Side,
@@ -161,6 +162,23 @@ export function createGridSet(title: string): GridSet {
       ["", "", ""],
       ["", "", ""],
     ],
+    createdAt: now,
+    updatedAt: now,
+  };
+  writeAll([...readAll(), set]);
+  return set;
+}
+
+export function createMixGapSet(title: string): MixGapSet {
+  const now = Date.now();
+  const set: MixGapSet = {
+    id: makeId(),
+    kind: "mixgap",
+    title,
+    text: "",
+    gaps: [],
+    findIt: [],
+    comprehension: [],
     createdAt: now,
     updatedAt: now,
   };

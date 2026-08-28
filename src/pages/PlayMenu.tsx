@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { GAMES } from "../games/registry";
+import { MixGapMenu } from "../mixgap/MixGapMenu";
 import { toPlayable } from "../lib/compile";
 import { getSet } from "../storage/sets";
 import { isTextSide, type AnySet } from "../types";
@@ -12,6 +13,9 @@ export function PlayMenu() {
   );
 
   if (!setId || !set) return <Navigate to="/" replace />;
+
+  // Mix & Gap has its own bank of activities rather than the match games.
+  if (set.kind === "mixgap") return <MixGapMenu set={set} />;
 
   // Multi-Choice has a single bespoke activity, so skip the menu entirely.
   if (set.kind === "multichoice") {

@@ -62,10 +62,34 @@ export interface GridSet extends BaseSet {
   cells: string[][];
 }
 
-/** Mix & Gap: a short text, worked on line by line. */
+/** One word the teacher chose to gap, identified by its position in the text. */
+export interface MixGapGap {
+  /** Index among the text's words (punctuation and spacing excluded). */
+  wordIndex: number;
+  /** Wrong answers for Multi Gaps; the real word is mixed in at play time. */
+  distractors?: string[];
+}
+
+/** A span of the passage the student has to find from a written prompt. */
+export interface FindItPrompt {
+  id: string;
+  prompt: string;
+  /** Character offsets into the passage. */
+  start: number;
+  end: number;
+}
+
+/**
+ * Mix & Gap: one passage (TaskMagic allows up to 500 words) that generates
+ * a bank of reconstruction activities, plus gaps, comprehension questions
+ * and Find it! prompts the teacher adds on top.
+ */
 export interface MixGapSet extends BaseSet {
   kind: "mixgap";
-  lines: string[];
+  text: string;
+  gaps: MixGapGap[];
+  findIt: FindItPrompt[];
+  comprehension: MultiChoiceQuestion[];
 }
 
 /** Dialogues: an ordered script of speaker turns. */

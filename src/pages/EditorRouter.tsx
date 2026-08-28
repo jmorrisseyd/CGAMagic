@@ -2,6 +2,7 @@ import { Navigate, useParams } from "react-router-dom";
 import { getSet } from "../storage/sets";
 import { Editor } from "./Editor";
 import { GridEditor } from "./GridEditor";
+import { MixGapEditor } from "./MixGapEditor";
 import { MultiChoiceEditor } from "./MultiChoiceEditor";
 
 /** Sends /edit/:setId to whichever authoring screen the set kind needs. */
@@ -17,6 +18,8 @@ export function EditorRouter() {
       return <GridEditor />;
     case "multichoice":
       return <MultiChoiceEditor />;
+    case "mixgap":
+      return <MixGapEditor />;
     default:
       return <Navigate to="/" replace />;
   }
