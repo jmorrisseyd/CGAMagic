@@ -7,6 +7,7 @@ import {
   createMultiChoiceSet,
   deleteSet,
   exportSet,
+  importMdl3Files,
   importSet,
   listSets,
   loadEdexcelUnit1Sets,
@@ -158,14 +159,39 @@ export function Home() {
   }
 
   async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const chosen = [...(e.target.files ?? [])];
+    if (chosen.length === 0) return;
+
+    const mdl3 = chosen.filter((f) => f.name.toLowerCase().endsWith(".mdl3"));
+    const json = chosen.filter((f) => !f.name.toLowerCase().endsWith(".mdl3"));
+    const problems: string[] = [];
+    let added = 0;
+
     try {
-      await importSet(await file.text());
+      if (mdl3.length > 0) {
+        const loaded = await Promise.all(
+          mdl3.map(async (f) => ({ name: f.name, buffer: await f.arrayBuffer() })),
+        );
+        const { imported, failures } = importMdl3Files(loaded);
+        added += imported.length;
+        problems.push(...failures.map((f) => `${f.name} (${f.reason})`));
+      }
+      for (const f of json) {
+        try {
+          await importSet(await f.text());
+          added++;
+        } catch {
+          problems.push(f.name);
+        }
+      }
+
       refresh();
-      setError(null);
-    } catch {
-      setError("That file doesn't look like a valid CGAMagic export.");
+      setError(problems.length > 0 ? `Couldn't read: ${problems.join(", ")}` : null);
+      setMessage(
+        added > 0
+          ? `Imported ${added} set${added === 1 ? "" : "s"}.`
+          : null,
+      );
     } finally {
       if (fileInput.current) fileInput.current.value = "";
     }
@@ -190,7 +216,7 @@ export function Home() {
             onClick={() => fileInput.current?.click()}
             className="rounded-lg bg-white hover:bg-slate-50 border border-slate-300 font-medium px-5 py-2.5"
           >
-            Import from file
+            Import files
           </button>
           <button
             onClick={() =>
@@ -214,7 +240,8 @@ export function Home() {
           <input
             ref={fileInput}
             type="file"
-            accept="application/json"
+            multiple
+            accept=".json,.mdl3,application/json"
             className="hidden"
             onChange={handleImportFile}
           />

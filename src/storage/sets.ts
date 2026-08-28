@@ -1,6 +1,7 @@
 import { edexcelUnit1Sets } from "../data/edexcelUnit1";
 import { exampleSets, type ExampleSet } from "../data/exampleSets";
 import { makeId } from "../lib/id";
+import { parseMdl3, titleFromFilename } from "../lib/mdl3";
 import type {
   AnySet,
   GridSet,
@@ -289,6 +290,57 @@ function remapSide(side: Side, remap: Map<string, string>): Side {
     if (next) return { ...side, mediaId: next };
   }
   return side;
+}
+
+/**
+ * Imports TaskMagic 3 `.mdl3` Text Match files. Written as a batch because
+ * a department's back catalogue runs to hundreds of files and rewriting
+ * storage once per file would be quadratic.
+ *
+ * TaskMagic doesn't record which language each column holds, so the labels
+ * are a sensible default the teacher can rename per set.
+ */
+export function importMdl3Files(
+  files: { name: string; buffer: ArrayBuffer }[],
+): { imported: MatchSet[]; failures: { name: string; reason: string }[] } {
+  const imported: MatchSet[] = [];
+  const failures: { name: string; reason: string }[] = [];
+  const now = Date.now();
+
+  for (const file of files) {
+    try {
+      const parsed = parseMdl3(file.buffer);
+      if (parsed.pairs.length === 0) {
+        failures.push({ name: file.name, reason: "no pairs in file" });
+        continue;
+      }
+      imported.push({
+        id: makeId(),
+        kind: "match",
+        template: "text-match",
+        title: titleFromFilename(file.name),
+        leftLabel: "Target language",
+        rightLabel: "English",
+        leftKind: "text",
+        rightKind: "text",
+        pairs: parsed.pairs.map((p) => ({
+          id: makeId(),
+          left: { kind: "text", text: p.left },
+          right: { kind: "text", text: p.right },
+        })),
+        createdAt: now,
+        updatedAt: now,
+      });
+    } catch (err) {
+      failures.push({
+        name: file.name,
+        reason: err instanceof Error ? err.message : "could not be read",
+      });
+    }
+  }
+
+  if (imported.length > 0) writeAll([...readAll(), ...imported]);
+  return { imported, failures };
 }
 
 /**
