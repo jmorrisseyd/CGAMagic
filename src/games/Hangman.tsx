@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { PlayableSet } from "../lib/compile";
 import { sample } from "../lib/shuffle";
 import { isTextSide, sideText, type Pair } from "../types";
@@ -7,7 +7,14 @@ import { GameShell } from "./GameShell";
 const MAX_WORDS = 16;
 const MAX_WRONG = 6;
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz".split("");
-const ACCENTED = "àâäéèêëîïôöùûüçñ".split("");
+
+/**
+ * Any Unicode letter is guessable. A hard-coded accent list used to miss
+ * the Spanish acutes (á í ó ú) and ß/œ, which meant those characters were
+ * treated as punctuation and revealed for free — giving part of the word
+ * away. Punctuation like ¿ and ’ is still not a letter, so it stays shown.
+ */
+const LETTER = /\p{L}/u;
 
 type Direction = "leftToRight" | "rightToLeft";
 
@@ -39,12 +46,23 @@ export function Hangman({ set }: { set: PlayableSet }) {
   const secret = sideText(direction === "leftToRight" ? current.right : current.left);
   const guessLabel = direction === "leftToRight" ? set.rightLabel : set.leftLabel;
   const secretLetters = new Set(
-    secret.toLowerCase().split("").filter((c) => /[a-zàâäéèêëîïôöùûüçñ]/.test(c)),
+    secret.toLowerCase().split("").filter((c) => LETTER.test(c)),
   );
   const won = [...secretLetters].every((l) => guessed.has(l));
   const lost = wrong >= MAX_WRONG;
   const roundOver = won || lost;
   const allDone = index + 1 >= items.length && roundOver;
+
+  const accentedKeys = useMemo(() => {
+    const found = new Set<string>();
+    for (const pair of items) {
+      const text = (sideText(pair.left) + sideText(pair.right)).toLowerCase();
+      for (const ch of text) {
+        if (ch.charCodeAt(0) > 127 && LETTER.test(ch)) found.add(ch);
+      }
+    }
+    return [...found].sort();
+  }, [items]);
 
   function newGame(nextDirection: Direction = direction) {
     setDirection(nextDirection);
@@ -122,7 +140,7 @@ export function Hangman({ set }: { set: PlayableSet }) {
             <div className="text-3xl font-mono tracking-widest">
               {secret.split("").map((ch, i) => {
                 const lower = ch.toLowerCase();
-                const isLetter = /[a-zàâäéèêëîïôöùûüçñ]/.test(lower);
+                const isLetter = LETTER.test(lower);
                 const show = !isLetter || guessed.has(lower) || roundOver;
                 return (
                   <span key={i} className="inline-block w-8 text-center border-b-4 border-slate-400 mx-0.5">
@@ -151,11 +169,13 @@ export function Hangman({ set }: { set: PlayableSet }) {
                     <LetterButton key={l} letter={l} guessed={guessed} onGuess={guess} secretLetters={secretLetters} />
                   ))}
                 </div>
-                <div className="flex flex-wrap gap-1 justify-center max-w-md">
-                  {ACCENTED.map((l) => (
-                    <LetterButton key={l} letter={l} guessed={guessed} onGuess={guess} secretLetters={secretLetters} />
-                  ))}
-                </div>
+                {accentedKeys.length > 0 && (
+                  <div className="flex flex-wrap gap-1 justify-center max-w-md">
+                    {accentedKeys.map((l) => (
+                      <LetterButton key={l} letter={l} guessed={guessed} onGuess={guess} secretLetters={secretLetters} />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </>

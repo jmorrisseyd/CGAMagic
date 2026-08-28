@@ -1,7 +1,7 @@
 /**
  * Reader for TaskMagic 3's `.mdl3` Text Match files.
  *
- * The format was worked out by inspecting a corpus of 166 real department
+ * The format was worked out by inspecting a corpus of 188 real department
  * files; it is not documented anywhere and TaskMagic is no longer sold.
  * It's a flat, uncompressed layout of space-padded fixed-width fields:
  *
@@ -15,11 +15,12 @@
  *   + 4 trailing bytes
  *
  * Every field is exactly 200 bytes, right-padded with spaces (0x20), so
- * total size is always 400*N + 624 — which held for all 166 samples.
+ * total size is always 400*N + 624 — which held for all 188 samples.
  *
  * Text is Windows-1252, not Latin-1: the corpus contains 0x92 (curly
- * apostrophe), 0x80 (euro) and 0x9c (oe ligature), which are undefined in
- * Latin-1 and would decode to control characters.
+ * apostrophe), 0x9c (oe ligature), 0x93/0x94 (curly double quotes), 0x85
+ * (ellipsis) and 0x80 (euro). Latin-1 maps those to C1 control characters,
+ * so "L’estomac" and "ma sœur" would come out as invisible mojibake.
  */
 
 const MAGIC = "TaskMagic Binary";
@@ -43,13 +44,39 @@ export interface Mdl3File {
 
 export class Mdl3ParseError extends Error {}
 
+/**
+ * windows-1252's 0x80-0x9F range, which is where it differs from Latin-1.
+ * Everything outside this range maps to the same code point as the byte.
+ *
+ * This is spelled out rather than delegated to TextDecoder because not
+ * every JS runtime actually implements the legacy single-byte tables — a
+ * Node build here decoded 0x92 to U+0092 (an invisible control character)
+ * for every label including "windows-1252", silently turning "L’estomac"
+ * into "Lestomac". Doing the mapping by hand makes the result
+ * identical everywhere.
+ */
+const CP1252_HIGH: readonly number[] = [
+  0x20ac, 0x0081, 0x201a, 0x0192, 0x201e, 0x2026, 0x2020, 0x2021, // 80-87
+  0x02c6, 0x2030, 0x0160, 0x2039, 0x0152, 0x008d, 0x017d, 0x008f, // 88-8F
+  0x0090, 0x2018, 0x2019, 0x201c, 0x201d, 0x2022, 0x2013, 0x2014, // 90-97
+  0x02dc, 0x2122, 0x0161, 0x203a, 0x0153, 0x009d, 0x017e, 0x0178, // 98-9F
+];
+
+function decodeCp1252(bytes: Uint8Array): string {
+  let out = "";
+  for (const byte of bytes) {
+    out += String.fromCodePoint(
+      byte >= 0x80 && byte <= 0x9f ? CP1252_HIGH[byte - 0x80] : byte,
+    );
+  }
+  return out;
+}
+
 function decodeField(bytes: Uint8Array): string {
-  // windows-1252 is required for the curly quotes and accented characters
-  // Word-authored vocab lists are full of.
-  const text = new TextDecoder("windows-1252").decode(bytes);
-  // Fields are space-padded to their full width; a trailing NUL can appear
-  // in the final padding field.
-  return text.replace(/[\s\0]+$/, "");
+  // Fields are padded to their full width with spaces, and the final
+  // padding field can carry trailing NULs. Only those two are padding —
+  // a tab is real content, so \s must not be used here.
+  return decodeCp1252(bytes).replace(/[ \0]+$/, "");
 }
 
 export function parseMdl3(buffer: ArrayBuffer): Mdl3File {
@@ -59,7 +86,7 @@ export function parseMdl3(buffer: ArrayBuffer): Mdl3File {
     throw new Mdl3ParseError("File is too short to be a TaskMagic file.");
   }
 
-  const magic = new TextDecoder("windows-1252").decode(bytes.subarray(0, 16));
+  const magic = decodeCp1252(bytes.subarray(0, 16));
   if (magic !== MAGIC) {
     throw new Mdl3ParseError("Not a TaskMagic file (missing signature).");
   }
