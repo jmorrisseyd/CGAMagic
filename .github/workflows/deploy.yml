@@ -24,6 +24,10 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      # Gate the deploy on lint and tests, not just on the build. `npm run
+      # build` already runs tsc, so types were covered; these were not.
+      - run: npm run lint
+      - run: npm test
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

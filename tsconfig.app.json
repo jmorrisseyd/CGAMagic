@@ -22,5 +22,9 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  // Tests are type-checked by their own project, not as part of the app
+  // build: pulling Vitest's types into the production compile slowed
+  // `tsc -b` enormously and would ship test code's types with the app.
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
 }
