@@ -74,9 +74,8 @@ export const GAMES: GameInfo[] = [
     id: "oxo",
     name: "OXO",
     description:
-      "Noughts and crosses, two teams. Type the answer to claim a square — a wrong answer hands it to the other side.",
+      "Noughts and crosses, two teams. Claim a square, then pick its answer from the list beside the board — a wrong pick hands the square to the other side.",
     minPairs: 4,
-    needsTextAnswer: true,
   },
   {
     id: "type",
