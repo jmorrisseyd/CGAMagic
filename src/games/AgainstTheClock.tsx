@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { SideView } from "../components/SideView";
 import type { PlayableSet } from "../lib/compile";
+import { interchangeable } from "../lib/quiz";
 import { sample, shuffle } from "../lib/shuffle";
 import type { Pair } from "../types";
 import { GameShell } from "./GameShell";
@@ -13,7 +14,11 @@ export function AgainstTheClock({ set }: { set: PlayableSet }) {
     sample(set.pairs, Math.min(MAX_ITEMS, set.pairs.length)),
   );
   const [rightOrder, setRightOrder] = useState<Pair[]>(() => shuffle(items));
-  const [matched, setMatched] = useState<Set<string>>(new Set());
+  // Tracked per column: when two pairs share an answer, either copy is a
+  // correct match, so the prompt and answer used up can come from
+  // different pairs.
+  const [matchedLeft, setMatchedLeft] = useState<Set<string>>(new Set());
+  const [matchedRight, setMatchedRight] = useState<Set<string>>(new Set());
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
   const [wrongFlash, setWrongFlash] = useState<{ left: string; right: string } | null>(
     null,
@@ -29,7 +34,8 @@ export function AgainstTheClock({ set }: { set: PlayableSet }) {
     const chosen = sample(set.pairs, Math.min(MAX_ITEMS, set.pairs.length));
     setItems(chosen);
     setRightOrder(shuffle(chosen));
-    setMatched(new Set());
+    setMatchedLeft(new Set());
+    setMatchedRight(new Set());
     setSelectedLeft(null);
     setWrongFlash(null);
     setStarted(false);
@@ -60,15 +66,17 @@ export function AgainstTheClock({ set }: { set: PlayableSet }) {
   }, [started, finished]);
 
   function pickLeft(id: string) {
-    if (!started || finished || matched.has(id)) return;
+    if (!started || finished || matchedLeft.has(id)) return;
     setSelectedLeft(id);
   }
 
   function pickRight(pair: Pair) {
-    if (!started || finished || !selectedLeft || matched.has(pair.id)) return;
-    if (selectedLeft === pair.id) {
-      const next = new Set(matched).add(pair.id);
-      setMatched(next);
+    if (!started || finished || !selectedLeft || matchedRight.has(pair.id)) return;
+    const prompt = items.find((p) => p.id === selectedLeft);
+    if (prompt && interchangeable(prompt, pair)) {
+      const next = new Set(matchedLeft).add(prompt.id);
+      setMatchedLeft(next);
+      setMatchedRight((m) => new Set(m).add(pair.id));
       setSelectedLeft(null);
       if (next.size === items.length) {
         setFinished("win");
@@ -106,7 +114,7 @@ export function AgainstTheClock({ set }: { set: PlayableSet }) {
               {finished === "win" ? "All matched! 🎉" : "Time's up!"}
             </div>
             <div className="text-lg text-slate-600">
-              Matched {matched.size} of {items.length}
+              Matched {matchedLeft.size} of {items.length}
             </div>
             <button
               onClick={newGame}
@@ -122,9 +130,9 @@ export function AgainstTheClock({ set }: { set: PlayableSet }) {
                 <button
                   key={p.id}
                   onClick={() => pickLeft(p.id)}
-                  disabled={matched.has(p.id)}
+                  disabled={matchedLeft.has(p.id)}
                   className={`rounded-lg px-4 py-3 font-medium text-left ${
-                    matched.has(p.id)
+                    matchedLeft.has(p.id)
                       ? "bg-leaf-100 text-leaf-700"
                       : selectedLeft === p.id
                         ? "bg-cga-500 text-white"
@@ -142,9 +150,9 @@ export function AgainstTheClock({ set }: { set: PlayableSet }) {
                 <button
                   key={p.id}
                   onClick={() => pickRight(p)}
-                  disabled={matched.has(p.id)}
+                  disabled={matchedRight.has(p.id)}
                   className={`rounded-lg px-4 py-3 font-medium text-left ${
-                    matched.has(p.id)
+                    matchedRight.has(p.id)
                       ? "bg-leaf-100 text-leaf-700"
                       : wrongFlash?.right === p.id
                         ? "bg-red-200"

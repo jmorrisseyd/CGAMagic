@@ -14,23 +14,31 @@ export function Flashcards({ set }: { set: PlayableSet }) {
   const [known, setKnown] = useState(0);
   const [unknown, setUnknown] = useState<Pair[]>([]);
   const [done, setDone] = useState(false);
+  /** True once the first pass is over and missed cards are coming round again. */
+  const [retrying, setRetrying] = useState(false);
 
   const current = queue[0];
 
-  function toggleOrder() {
-    const nextRandom = !random;
+  function restart(nextRandom: boolean = random) {
     setRandom(nextRandom);
     setQueue(nextRandom ? shuffle(set.pairs) : [...set.pairs]);
     setRevealed(false);
     setKnown(0);
     setUnknown([]);
     setDone(false);
+    setRetrying(false);
+  }
+
+  function toggleOrder() {
+    restart(!random);
   }
 
   function advance(knewIt: boolean) {
     const rest = queue.slice(1);
     if (knewIt) {
-      setKnown((k) => k + 1);
+      // The summary reports cards known first time, so a card got right
+      // on a later lap doesn't count.
+      if (!retrying) setKnown((k) => k + 1);
     } else {
       setUnknown((u) => [...u, current]);
     }
@@ -42,6 +50,7 @@ export function Flashcards({ set }: { set: PlayableSet }) {
       setQueue(random ? shuffle(retry) : retry);
       setUnknown([]);
       setRevealed(false);
+      setRetrying(true);
     } else {
       setDone(true);
     }
@@ -54,7 +63,7 @@ export function Flashcards({ set }: { set: PlayableSet }) {
       gameName="Flashcards"
       status={
         <div className="text-sm text-slate-200">
-          Known: {known} &middot; Cards left: {queue.length}
+          Known first time: {known} &middot; Cards left: {queue.length}
         </div>
       }
     >
@@ -64,7 +73,7 @@ export function Flashcards({ set }: { set: PlayableSet }) {
         </button>
 
         {done ? (
-          <Summary known={known} total={set.pairs.length} onRestart={toggleOrder} />
+          <Summary known={known} total={set.pairs.length} onRestart={() => restart()} />
         ) : (
           <>
             <div

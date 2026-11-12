@@ -38,7 +38,9 @@ export function stripAccents(s: string): string {
 }
 
 export function normaliseForGrid(s: string): string {
-  return stripAccents(s)
+  // Ligatures don't decompose under NFD, so without spelling them out
+  // "sœur" went into the grid as SUR. (ß is fine: upper-casing gives SS.)
+  return stripAccents(s.replace(/œ/gi, "oe").replace(/æ/gi, "ae"))
     .toUpperCase()
     .replace(/[^A-Z]/g, "");
 }

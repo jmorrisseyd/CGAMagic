@@ -3,7 +3,7 @@ import { AccentBar } from "../components/AccentBar";
 import { SideView } from "../components/SideView";
 import type { PlayableSet } from "../lib/compile";
 import { shuffle } from "../lib/shuffle";
-import { sideText, type Pair } from "../types";
+import { sideIsTypeable, sideText, type Pair } from "../types";
 import { GameShell } from "./GameShell";
 
 type Mode = "practice" | "test";
@@ -28,7 +28,15 @@ function normalize(s: string, caseSensitive: boolean): string {
  */
 export function Trainer({ set }: { set: PlayableSet }) {
   const [mode, setMode] = useState<Mode>("practice");
-  const [direction, setDirection] = useState<Direction>("leftToRight");
+  // Only a written side can be typed: on a Picture or Sound Match set the
+  // answer has to be the text side, so the switch is offered only when
+  // both sides are text.
+  const leftTypeable = sideIsTypeable(set.pairs, "left");
+  const rightTypeable = sideIsTypeable(set.pairs, "right");
+  const canSwitch = leftTypeable && rightTypeable;
+  const [direction, setDirection] = useState<Direction>(
+    rightTypeable || !leftTypeable ? "leftToRight" : "rightToLeft",
+  );
   const [caseSensitive, setCaseSensitive] = useState(false);
   const [started, setStarted] = useState(false);
   const [items, setItems] = useState<Pair[]>(() => shuffle(set.pairs));
@@ -39,6 +47,12 @@ export function Trainer({ set }: { set: PlayableSet }) {
   const [revealed, setRevealed] = useState(0);
   const [done, setDone] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  /**
+   * True during the short pause after a right answer in practice. A second
+   * Enter in that pause used to record the answer again and skip the next
+   * question. A ref, not state, so it holds even within one tick.
+   */
+  const advancing = useRef(false);
 
   const current = items[index];
   const promptSide = direction === "leftToRight" ? current?.left : current?.right;
@@ -55,6 +69,7 @@ export function Trainer({ set }: { set: PlayableSet }) {
     setRevealed(0);
     setDone(false);
     setStarted(true);
+    advancing.current = false;
   }
 
   function record(correct: boolean) {
@@ -62,6 +77,7 @@ export function Trainer({ set }: { set: PlayableSet }) {
   }
 
   function advance() {
+    advancing.current = false;
     setValue("");
     setFeedback(null);
     setRevealed(0);
@@ -71,6 +87,7 @@ export function Trainer({ set }: { set: PlayableSet }) {
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (advancing.current) return;
     const correct =
       normalize(value, caseSensitive) === normalize(expected, caseSensitive);
 
@@ -83,6 +100,7 @@ export function Trainer({ set }: { set: PlayableSet }) {
     if (correct) {
       record(true);
       setFeedback("right");
+      advancing.current = true;
       window.setTimeout(advance, 700);
     } else {
       setFeedback("wrong");
@@ -90,6 +108,7 @@ export function Trainer({ set }: { set: PlayableSet }) {
   }
 
   function skip() {
+    if (advancing.current) return;
     record(false);
     advance();
   }
@@ -101,18 +120,25 @@ export function Trainer({ set }: { set: PlayableSet }) {
       <GameShell setId={set.id} setTitle={set.title} gameName="Trainer">
         <div className="flex flex-col items-center gap-6 max-w-md">
           <div className="flex flex-col gap-3 w-full bg-white rounded-xl shadow p-5">
-            <button
-              onClick={() =>
-                setDirection(
-                  direction === "leftToRight" ? "rightToLeft" : "leftToRight",
-                )
-              }
-              className="text-sm text-slate-500 underline self-start"
-            >
-              Answer in:{" "}
-              {direction === "leftToRight" ? set.rightLabel : set.leftLabel} (click to
-              switch)
-            </button>
+            {canSwitch ? (
+              <button
+                onClick={() =>
+                  setDirection(
+                    direction === "leftToRight" ? "rightToLeft" : "leftToRight",
+                  )
+                }
+                className="text-sm text-slate-500 underline self-start"
+              >
+                Answer in:{" "}
+                {direction === "leftToRight" ? set.rightLabel : set.leftLabel} (click
+                to switch)
+              </button>
+            ) : (
+              <span className="text-sm text-slate-500 self-start">
+                Answer in:{" "}
+                {direction === "leftToRight" ? set.rightLabel : set.leftLabel}
+              </span>
+            )}
             <label className="flex items-center gap-2 text-sm text-slate-600">
               <input
                 type="checkbox"

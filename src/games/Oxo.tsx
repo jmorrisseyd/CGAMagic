@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { SideView } from "../components/SideView";
 import type { PlayableSet } from "../lib/compile";
-import { sample, shuffle } from "../lib/shuffle";
+import { sameSide } from "../lib/quiz";
+import { shuffle } from "../lib/shuffle";
 import type { Pair, Side } from "../types";
 import { GameShell } from "./GameShell";
 
@@ -48,11 +49,24 @@ function buildOptions(cells: Pair[], allPairs: Pair[]): Option[] {
   const needed = new Map<string, Pair>();
   for (const cell of cells) needed.set(cell.id, cell);
 
-  const spare = allPairs.filter((p) => !needed.has(p.id));
-  const herrings = sample(spare, Math.min(RED_HERRINGS, spare.length));
+  // One option per distinct answer: two squares that share an answer
+  // (synonyms, or "je" and "il" both giving "parle") share one button.
+  const answers: Pair[] = [];
+  for (const p of needed.values()) {
+    if (!answers.some((a) => sameSide(a.right, p.right))) answers.push(p);
+  }
+
+  // A red herring must not look like a real answer, or like another herring.
+  const herrings: Pair[] = [];
+  for (const p of shuffle(allPairs)) {
+    if (herrings.length >= RED_HERRINGS) break;
+    if (needed.has(p.id)) continue;
+    if ([...answers, ...herrings].some((x) => sameSide(x.right, p.right))) continue;
+    herrings.push(p);
+  }
 
   return shuffle([
-    ...[...needed.values()].map((p) => ({
+    ...answers.map((p) => ({
       key: `answer-${p.id}`,
       pairId: p.id,
       side: p.right,
@@ -95,17 +109,15 @@ export function Oxo({ set }: { set: PlayableSet }) {
   const over = !!winner || full;
 
   /**
-   * An answer is spent once no unclaimed square still needs it. Checked
-   * against the remaining squares rather than a used-list, because a short
-   * set can place the same pair on two squares.
+   * The answers unclaimed squares still need. An option is spent once none
+   * of these matches it. Checked against the remaining squares rather than
+   * a used-list, because a short set can place the same pair on two squares
+   * and different pairs can share an answer.
    */
-  const stillNeeded = useMemo(() => {
-    const ids = new Set<string>();
-    cells.forEach((cell, i) => {
-      if (!owner[i]) ids.add(cell.id);
-    });
-    return ids;
-  }, [cells, owner]);
+  const stillNeeded = useMemo(
+    () => cells.filter((_, i) => !owner[i]).map((cell) => cell.right),
+    [cells, owner],
+  );
 
   function newGame() {
     const nextCells = assignCells(set.pairs);
@@ -131,7 +143,8 @@ export function Oxo({ set }: { set: PlayableSet }) {
     const target = cells[active];
     const other: Team = turn === "X" ? "O" : "X";
 
-    if (option.pairId === target.id) {
+    // Judged on what the answer says, not which pair it came from.
+    if (option.pairId !== null && sameSide(option.side, target.right)) {
       claim(active, turn);
       setCorrection(null);
     } else {
@@ -234,7 +247,8 @@ export function Oxo({ set }: { set: PlayableSet }) {
                   // Herrings never get spent; real answers grey out once no
                   // remaining square needs them.
                   const spent =
-                    option.pairId !== null && !stillNeeded.has(option.pairId);
+                    option.pairId !== null &&
+                    !stillNeeded.some((side) => sameSide(side, option.side));
                   const disabled = spent || active === null;
                   return (
                     <button

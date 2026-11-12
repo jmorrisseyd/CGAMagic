@@ -3,7 +3,7 @@ import { AccentBar } from "../components/AccentBar";
 import { SideView } from "../components/SideView";
 import type { PlayableSet } from "../lib/compile";
 import { shuffle } from "../lib/shuffle";
-import { sideText, type Pair } from "../types";
+import { sideIsTypeable, sideText, type Pair } from "../types";
 import { GameShell } from "./GameShell";
 
 function normalize(s: string): string {
@@ -13,7 +13,14 @@ function normalize(s: string): string {
 type Direction = "leftToRight" | "rightToLeft";
 
 export function TypeGame({ set }: { set: PlayableSet }) {
-  const [direction, setDirection] = useState<Direction>("leftToRight");
+  // Only a written side can be typed, so the direction switch is offered
+  // only when both sides are text (not on Picture or Sound Match sets).
+  const leftTypeable = sideIsTypeable(set.pairs, "left");
+  const rightTypeable = sideIsTypeable(set.pairs, "right");
+  const canSwitch = leftTypeable && rightTypeable;
+  const [direction, setDirection] = useState<Direction>(
+    rightTypeable || !leftTypeable ? "leftToRight" : "rightToLeft",
+  );
   const [items] = useState<Pair[]>(() => shuffle(set.pairs));
   const [index, setIndex] = useState(0);
   const [value, setValue] = useState("");
@@ -87,13 +94,17 @@ export function TypeGame({ set }: { set: PlayableSet }) {
         </div>
       ) : (
         <form onSubmit={submit} className="flex flex-col items-center gap-6 w-96">
-          <button
-            type="button"
-            onClick={switchDirection}
-            className="text-sm text-slate-500 underline"
-          >
-            Type in: {typeLabel} (click to switch)
-          </button>
+          {canSwitch ? (
+            <button
+              type="button"
+              onClick={switchDirection}
+              className="text-sm text-slate-500 underline"
+            >
+              Type in: {typeLabel} (click to switch)
+            </button>
+          ) : (
+            <span className="text-sm text-slate-500">Type in: {typeLabel}</span>
+          )}
           <div className="text-sm text-slate-500">
             Item {index + 1} of {items.length}
           </div>

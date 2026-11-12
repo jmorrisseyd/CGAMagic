@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { PlayableSet } from "../lib/compile";
 import { accentKeysFor, isTypedLetter, LETTER, QWERTY_ROWS } from "../lib/keyboard";
 import { sample } from "../lib/shuffle";
-import { isTextSide, sideText, type Pair } from "../types";
+import { sideIsTypeable, sideText, type Pair } from "../types";
 import { GameShell } from "./GameShell";
 
 const MAX_WORDS = 16;
@@ -16,14 +16,10 @@ const MAX_WRONG = 6;
 
 type Direction = "leftToRight" | "rightToLeft";
 
-/** A side is only guessable if it's written text — you can't spell a picture. */
-function sideIsSpellable(pairs: PlayableSet["pairs"], which: "left" | "right") {
-  return pairs.length > 0 && pairs.every((p) => isTextSide(p[which]));
-}
-
 export function Hangman({ set }: { set: PlayableSet }) {
-  const leftSpellable = sideIsSpellable(set.pairs, "left");
-  const rightSpellable = sideIsSpellable(set.pairs, "right");
+  // A side is only guessable if it's written text — you can't spell a picture.
+  const leftSpellable = sideIsTypeable(set.pairs, "left");
+  const rightSpellable = sideIsTypeable(set.pairs, "right");
   // Prefer guessing the left (target language) side, but fall back to the
   // right when the left is a picture or a sound — otherwise the secret is
   // empty and the round counts as won before it starts.
@@ -39,6 +35,8 @@ export function Hangman({ set }: { set: PlayableSet }) {
   const [wrong, setWrong] = useState(0);
   const [saved, setSaved] = useState(0);
   const [hanged, setHanged] = useState(0);
+  /** Set once the player has clicked through the final word's result. */
+  const [finished, setFinished] = useState(false);
 
   const current = items[index];
   const secret = sideText(direction === "leftToRight" ? current.right : current.left);
@@ -49,7 +47,11 @@ export function Hangman({ set }: { set: PlayableSet }) {
   const won = [...secretLetters].every((l) => guessed.has(l));
   const lost = wrong >= MAX_WRONG;
   const roundOver = won || lost;
-  const allDone = index + 1 >= items.length && roundOver;
+  const isLastWord = index + 1 >= items.length;
+  // The summary waits for the player to move on from the last word, the
+  // same as every other word. Jumping straight to it skipped both the
+  // reveal and the tally, so the final word was never counted.
+  const allDone = finished;
 
   // Always the same keys regardless of the current word, so the palette
   // can't hint at which letters the answer contains.
@@ -66,6 +68,7 @@ export function Hangman({ set }: { set: PlayableSet }) {
     setWrong(0);
     setSaved(0);
     setHanged(0);
+    setFinished(false);
   }
 
   function switchDirection() {
@@ -111,7 +114,9 @@ export function Hangman({ set }: { set: PlayableSet }) {
   function nextWord() {
     if (won) setSaved((s) => s + 1);
     if (lost) setHanged((h) => h + 1);
-    if (index + 1 < items.length) {
+    if (isLastWord) {
+      setFinished(true);
+    } else {
       setIndex((i) => i + 1);
       setGuessed(new Set());
       setWrong(0);
@@ -182,7 +187,7 @@ export function Hangman({ set }: { set: PlayableSet }) {
                   onClick={nextWord}
                   className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
                 >
-                  Next word →
+                  {isLastWord ? "See results →" : "Next word →"}
                 </button>
               </div>
             ) : (

@@ -162,3 +162,8 @@ export function sideText(side: Side): string {
 export function isTextSide(side: Side): boolean {
   return side.kind === "text";
 }
+
+/** Whether students can be asked to type or spell this side of every pair. */
+export function sideIsTypeable(pairs: Pair[], which: "left" | "right"): boolean {
+  return pairs.length > 0 && pairs.every((p) => isTextSide(p[which]));
+}

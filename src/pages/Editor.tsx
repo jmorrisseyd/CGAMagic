@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { SideEditor, emptySide } from "../components/SideEditor";
+import { splitBulkLine } from "../lib/bulk";
 import { makeId } from "../lib/id";
 import { getSet, saveSet } from "../storage/sets";
 import type { AnySet, MatchSet, Pair, Side } from "../types";
@@ -64,23 +65,24 @@ export function Editor() {
 
   function addBulk() {
     const lines = bulk.split("\n").map((l) => l.trim()).filter(Boolean);
-    const newPairs: Pair[] = lines
-      .map((line) => {
-        const parts = line.includes("\t")
-          ? line.split("\t")
-          : line.includes(",")
-            ? line.split(",")
-            : line.split(/\s+-\s+/);
-        if (parts.length < 2) return null;
-        return {
-          id: makeId(),
-          left: { kind: "text", text: parts[0].trim() } as Side,
-          right: { kind: "text", text: parts.slice(1).join(" ").trim() } as Side,
-        };
-      })
-      .filter((p): p is Pair => p !== null);
+    const newPairs: Pair[] = [];
+    const unread: string[] = [];
+    for (const line of lines) {
+      const parts = splitBulkLine(line);
+      if (!parts) {
+        unread.push(line);
+        continue;
+      }
+      newPairs.push({
+        id: makeId(),
+        left: { kind: "text", text: parts[0] } as Side,
+        right: { kind: "text", text: parts[1] } as Side,
+      });
+    }
     updatePairs((pairs) => [...pairs, ...newPairs]);
-    setBulk("");
+    // Lines that couldn't be split stay in the box to be fixed, rather
+    // than vanishing along with the ones that worked.
+    setBulk(unread.join("\n"));
   }
 
   function save() {

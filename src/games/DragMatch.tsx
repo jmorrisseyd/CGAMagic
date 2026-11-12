@@ -11,6 +11,7 @@ import {
 import { useMemo, useState } from "react";
 import { SideView } from "../components/SideView";
 import type { PlayableSet } from "../lib/compile";
+import { interchangeable } from "../lib/quiz";
 import { shuffle } from "../lib/shuffle";
 import type { Side } from "../types";
 import { GameShell } from "./GameShell";
@@ -64,7 +65,10 @@ export function DragMatch({ set }: { set: PlayableSet }) {
   function check() {
     const results: Record<string, boolean> = {};
     for (const p of batch) {
-      results[p.id] = assignments[p.id] === p.id;
+      // Any chip carrying a correct answer for this prompt counts, not only
+      // the one from the same pair — two pairs can share an answer.
+      const placed = batch.find((x) => x.id === assignments[p.id]);
+      results[p.id] = !!placed && interchangeable(p, placed);
     }
     setChecked(results);
     setTimeout(() => {

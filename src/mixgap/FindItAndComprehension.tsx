@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { GameShell } from "../games/GameShell";
-import { jumble } from "../lib/mixgap";
+import { jumble, samePhrase } from "../lib/mixgap";
 import type { MixGapSet } from "../types";
 
 /**
@@ -27,7 +27,9 @@ export function FindIt({ set }: { set: MixGapSet }) {
     const expected = set.text.slice(current.start, current.end);
     // Compare on trimmed text rather than exact offsets: a student dragging
     // across a phrase routinely picks up a leading or trailing space.
-    const ok = text.trim() === expected.trim();
+    // Whitespace is squashed too, as a selection over a line break can
+    // come back with either a space or a newline.
+    const ok = samePhrase(text, expected);
     setFeedback(ok ? "right" : "wrong");
     if (ok) {
       setSolved((s) => [...s, current.id]);
@@ -77,7 +79,7 @@ export function FindIt({ set }: { set: MixGapSet }) {
 
             <p
               onMouseUp={checkSelection}
-              className={`bg-white rounded-lg shadow p-5 w-full text-lg leading-loose select-text cursor-text ${
+              className={`bg-white rounded-lg shadow p-5 w-full text-lg leading-loose select-text cursor-text whitespace-pre-wrap ${
                 feedback === "right"
                   ? "ring-2 ring-leaf-400"
                   : feedback === "wrong"
@@ -141,7 +143,7 @@ export function Comprehension({ set }: { set: MixGapSet }) {
     >
       <div className="flex flex-col gap-5 w-full max-w-3xl">
         {/* The passage stays on screen — it's reading comprehension, not recall. */}
-        <p className="bg-white rounded-lg shadow p-5 leading-relaxed text-slate-700">
+        <p className="bg-white rounded-lg shadow p-5 leading-relaxed text-slate-700 whitespace-pre-wrap">
           {set.text}
         </p>
 

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { makeId } from "../lib/id";
-import { tokenise, wordCount } from "../lib/mixgap";
+import { locatePhrase, remapAfterEdit, tokenise, wordCount } from "../lib/mixgap";
 import { confirmDiscard, useUnsavedGuard } from "../lib/useUnsavedGuard";
 import { getSet, saveSet } from "../storage/sets";
 import type { AnySet, MixGapSet } from "../types";
@@ -36,6 +36,19 @@ export function MixGapEditor() {
     setSet((s) => (s && s.kind === "mixgap" ? ({ ...s, ...patch } as AnySet) : s));
   }
 
+  /**
+   * Gaps and Find it! spans point into the passage by position, so an edit
+   * has to carry them along; ones the edit touched are dropped.
+   */
+  function editText(text: string) {
+    setDirty(true);
+    setSet((s) =>
+      s && s.kind === "mixgap"
+        ? { ...s, text, ...remapAfterEdit(s.text, text, s.gaps, s.findIt) }
+        : s,
+    );
+  }
+
   function toggleGap(wordIndex: number) {
     const has = gapped.has(wordIndex);
     update({
@@ -53,16 +66,14 @@ export function MixGapEditor() {
       alert("Highlight a word or phrase in the passage first.");
       return;
     }
-    const start = mg!.text.indexOf(text);
-    if (start === -1) {
+    // Whitespace-tolerant, so a phrase running over a line break is found.
+    const found = locatePhrase(mg!.text, text);
+    if (!found) {
       alert("Couldn't locate that selection in the passage — try again.");
       return;
     }
     update({
-      findIt: [
-        ...mg!.findIt,
-        { id: makeId(), prompt: "", start, end: start + text.length },
-      ],
+      findIt: [...mg!.findIt, { id: makeId(), prompt: "", ...found }],
     });
     selection?.removeAllRanges();
     setTab("findIt");
@@ -156,7 +167,7 @@ export function MixGapEditor() {
             </div>
             <textarea
               value={mg.text}
-              onChange={(e) => update({ text: e.target.value })}
+              onChange={(e) => editText(e.target.value)}
               rows={12}
               className="rounded border border-slate-300 px-3 py-2 leading-relaxed"
               placeholder={
@@ -179,7 +190,7 @@ export function MixGapEditor() {
               Click any word to gap it. These same gaps drive Gap-fill, Multi Gaps
               and Write Gaps.
             </p>
-            <div className="text-lg leading-loose">
+            <div className="text-lg leading-loose whitespace-pre-wrap">
               {tokens.map((t, i) =>
                 t.isWord ? (
                   <button
@@ -216,7 +227,7 @@ export function MixGapEditor() {
               Highlight a word or phrase in the passage below, click "Use selection",
               then write the prompt students will read.
             </p>
-            <p className="bg-slate-50 rounded p-4 leading-loose select-text">
+            <p className="bg-slate-50 rounded p-4 leading-loose select-text whitespace-pre-wrap">
               {mg.text || <span className="text-slate-400">Add a passage first.</span>}
             </p>
             <button

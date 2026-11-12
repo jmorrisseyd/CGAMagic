@@ -1,4 +1,4 @@
-import type { AnySet, GridSet, MatchSet, Pair } from "../types";
+import type { AnySet, GridSet, MatchSet, Pair, Side } from "../types";
 
 /**
  * A set flattened into the shape the match game bank consumes. Grid Match
@@ -24,6 +24,7 @@ export function compileGrid(set: GridSet): Pair[] {
     set.colHeaders.forEach((colHeader, c) => {
       const answer = set.cells[r]?.[c]?.trim();
       if (!answer) return; // blank cell = deliberately skipped combination
+      if (!gridPrompt(rowHeader, colHeader).trim()) return; // nothing to ask
       pairs.push({
         id: `${set.id}:${r}:${c}`,
         left: { kind: "text", text: gridPrompt(rowHeader, colHeader) },
@@ -34,8 +35,17 @@ export function compileGrid(set: GridSet): Pair[] {
   return pairs;
 }
 
+/** A side the teacher hasn't filled in: no text, or no file chosen. */
+function isBlank(side: Side): boolean {
+  return side.kind === "text" ? side.text.trim() === "" : side.mediaId === "";
+}
+
+/**
+ * Unfinished rows stay in the editor but aren't played: a spare "+ Add
+ * row" would otherwise turn up as a blank card in every game.
+ */
 export function compileMatch(set: MatchSet): Pair[] {
-  return set.pairs;
+  return set.pairs.filter((p) => !isBlank(p.left) && !isBlank(p.right));
 }
 
 /** Returns null for set kinds that have their own bespoke activities. */

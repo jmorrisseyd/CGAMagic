@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { SideView } from "../components/SideView";
 import type { PlayableSet } from "../lib/compile";
+import { interchangeable } from "../lib/quiz";
 import { sample, shuffle } from "../lib/shuffle";
 import type { Pair, Side } from "../types";
 import { GameShell } from "./GameShell";
@@ -8,15 +9,25 @@ import { GameShell } from "./GameShell";
 const MAX_PAIRS = 8;
 
 interface Card {
-  pairId: string;
+  pair: Pair;
+  face: "left" | "right";
   side: Side;
+}
+
+/**
+ * A prompt card matches any answer card that is correct for it. Usually
+ * that's the other half of its own pair, but two pairs can share an answer
+ * and a student can't tell those cards apart.
+ */
+function cardsMatch(a: Card, b: Card): boolean {
+  return a.face !== b.face && interchangeable(a.pair, b.pair);
 }
 
 function buildCards(pairs: Pair[]): Card[] {
   const chosen = sample(pairs, Math.min(MAX_PAIRS, pairs.length));
   const cards: Card[] = chosen.flatMap((p) => [
-    { pairId: p.id, side: p.left },
-    { pairId: p.id, side: p.right },
+    { pair: p, face: "left" as const, side: p.left },
+    { pair: p, face: "right" as const, side: p.right },
   ]);
   return shuffle(cards);
 }
@@ -25,16 +36,19 @@ export function Pelmanism({ set }: { set: PlayableSet }) {
   const [mode, setMode] = useState<"1p" | "2p">("1p");
   const [cards, setCards] = useState<Card[]>(() => buildCards(set.pairs));
   const [flipped, setFlipped] = useState<number[]>([]);
-  const [matched, setMatched] = useState<Set<string>>(new Set());
+  /** Indices of matched cards. */
+  const [matched, setMatched] = useState<Set<number>>(new Set());
+  /** Bumped per game so a flip still resolving can't leak into the next one. */
+  const game = useRef(0);
   const [busy, setBusy] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [scores, setScores] = useState({ 1: 0, 2: 0 });
   const [player, setPlayer] = useState<1 | 2>(1);
 
-  const totalPairs = cards.length / 2;
-  const gameOver = matched.size === totalPairs;
+  const gameOver = matched.size === cards.length;
 
   function newGame(nextMode: "1p" | "2p") {
+    game.current += 1;
     setMode(nextMode);
     setCards(buildCards(set.pairs));
     setFlipped([]);
@@ -46,17 +60,19 @@ export function Pelmanism({ set }: { set: PlayableSet }) {
   }
 
   function flip(index: number) {
-    if (busy || flipped.includes(index) || matched.has(cards[index].pairId)) return;
+    if (busy || flipped.includes(index) || matched.has(index)) return;
     if (flipped.length === 1) {
       const next = [...flipped, index];
       setFlipped(next);
       setBusy(true);
       setAttempts((a) => a + 1);
       const [a, b] = next;
-      const isMatch = cards[a].pairId === cards[b].pairId;
+      const isMatch = cardsMatch(cards[a], cards[b]);
+      const startedIn = game.current;
       setTimeout(() => {
+        if (game.current !== startedIn) return;
         if (isMatch) {
-          setMatched((m) => new Set(m).add(cards[a].pairId));
+          setMatched((m) => new Set(m).add(a).add(b));
           if (mode === "2p") setScores((s) => ({ ...s, [player]: s[player] + 1 }));
         } else if (mode === "2p") {
           setPlayer((p) => (p === 1 ? 2 : 1));
@@ -128,14 +144,14 @@ export function Pelmanism({ set }: { set: PlayableSet }) {
               style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
             >
               {cards.map((c, i) => {
-                const isFlipped = flipped.includes(i) || matched.has(c.pairId);
+                const isFlipped = flipped.includes(i) || matched.has(i);
                 return (
                   <button
                     key={i}
                     onClick={() => flip(i)}
-                    disabled={matched.has(c.pairId)}
+                    disabled={matched.has(i)}
                     className={`w-24 h-20 rounded-lg font-medium text-sm p-2 flex items-center justify-center text-center ${
-                      matched.has(c.pairId)
+                      matched.has(i)
                         ? "bg-leaf-100 text-leaf-800"
                         : isFlipped
                           ? "bg-white border-2 border-cga-400"

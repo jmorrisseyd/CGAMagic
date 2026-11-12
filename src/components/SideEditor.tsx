@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { makeId } from "../lib/id";
-import { deleteMedia, putMedia } from "../storage/media";
+import { putMedia } from "../storage/media";
 import type { Side, SideKind } from "../types";
 import { useMediaUrl } from "./SideView";
 
@@ -29,8 +29,10 @@ export function SideEditor({
     if (!file) return;
     const id = makeId();
     await putMedia(id, file);
-    // Replacing a picture or sound leaves the previous blob unreferenced.
-    if (mediaId) await deleteMedia(mediaId);
+    // The previous blob is deliberately left alone: the saved set still
+    // points at it until the teacher saves, so deleting it here lost the
+    // original if they then left without saving. Unreferenced blobs are
+    // cleared by pruneMedia() once nothing saved uses them.
     onChange(
       kind === "image"
         ? { kind: "image", mediaId: id, alt: file.name.replace(/\.[^.]+$/, "") }
