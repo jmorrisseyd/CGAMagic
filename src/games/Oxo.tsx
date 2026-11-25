@@ -233,7 +233,7 @@ export function Oxo({ set }: { set: PlayableSet }) {
               })}
             </div>
 
-            <div className="bg-white rounded-xl shadow p-4 flex flex-col gap-2 w-full md:w-72">
+            <div className="bg-white rounded-xl shadow p-4 flex flex-col gap-2 w-full md:w-[28rem]">
               <div className="text-xs uppercase tracking-wide text-slate-400">
                 Answers
               </div>
@@ -242,7 +242,8 @@ export function Oxo({ set }: { set: PlayableSet }) {
                   <SideView side={cells[active].left} imageClassName="max-h-24 mx-auto" />
                 </div>
               )}
-              <div className="flex flex-col gap-1.5">
+              {/* Two columns, so the list is no taller than the board. */}
+              <div className="grid grid-cols-2 gap-1.5">
                 {options.map((option) => {
                   // Herrings never get spent; real answers grey out once no
                   // remaining square needs them.

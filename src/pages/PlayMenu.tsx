@@ -54,19 +54,21 @@ export function PlayMenu() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto p-6">
-        <p className="text-slate-500 mb-6">
+      {/* Wide enough for three or four cards a row on a classroom screen,
+          so the whole menu is visible without scrolling. */}
+      <main className="max-w-7xl mx-auto p-6">
+        <p className="text-slate-500 mb-4">
           {playable.pairs.length} pair{playable.pairs.length === 1 ? "" : "s"} &middot;{" "}
           {playable.leftLabel} ↔ {playable.rightLabel}
         </p>
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {GAMES.map((g) => {
             const enoughPairs = playable.pairs.length >= g.minPairs;
             const typeable = !g.needsTextAnswer || hasTextAnswer;
             const enabled = enoughPairs && typeable;
             const content = (
               <div
-                className={`h-full rounded-xl p-5 border ${
+                className={`h-full rounded-xl p-4 border ${
                   enabled
                     ? "bg-white border-slate-200 hover:border-cga-400 hover:shadow"
                     : "bg-slate-50 border-slate-200 opacity-60 cursor-not-allowed"

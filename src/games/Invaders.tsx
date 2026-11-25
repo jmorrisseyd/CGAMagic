@@ -156,7 +156,9 @@ export function Invaders({ set }: { set: PlayableSet }) {
             }`}
           >
             <div
-              className="absolute left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg bg-white shadow-lg text-xl font-bold whitespace-nowrap"
+              // Wraps rather than running off the sides of the arena when a
+              // long prompt meets the enlarged screen size.
+              className="absolute left-1/2 -translate-x-1/2 w-max max-w-[calc(100%-1rem)] text-center px-6 py-3 rounded-lg bg-white shadow-lg text-xl font-bold"
               style={{ top: `${depth}%` }}
             >
               <SideView side={current.left} imageClassName="max-h-20" />

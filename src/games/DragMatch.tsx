@@ -107,14 +107,16 @@ export function DragMatch({ set }: { set: PlayableSet }) {
       }
     >
       <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-        <div className="flex flex-col items-center gap-6 w-full max-w-3xl">
-          <div className="grid grid-cols-2 gap-x-12 gap-y-3 w-full">
+        <div className="flex flex-col items-center gap-6 w-full max-w-3xl lg:max-w-6xl">
+          {/* Two pairs a row on wide screens: stacked eight deep, the batch
+              was too tall to fit a classroom screen without scrolling. */}
+          <div className="grid lg:grid-cols-2 gap-x-12 gap-y-3 w-full">
             {batch.map((p) => {
               const assignedId = assignments[p.id];
               const assignedPair = batch.find((x) => x.id === assignedId);
               const isChecked = checked[p.id];
               return (
-                <div key={p.id} className="contents">
+                <div key={p.id} className="grid grid-cols-2 gap-x-4">
                   <div className="flex items-center bg-white rounded-lg px-4 py-3 shadow font-medium min-h-16">
                     <SideView side={p.left} imageClassName="max-h-20" />
                   </div>

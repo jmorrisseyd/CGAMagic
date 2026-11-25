@@ -30,18 +30,20 @@ export function MixGapMenu({ set }: { set: MixGapSet }) {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto p-6">
-        <p className="text-slate-500 mb-6">
+      {/* Wide enough for three or four cards a row on a classroom screen,
+          so the whole menu is visible without scrolling. */}
+      <main className="max-w-7xl mx-auto p-6">
+        <p className="text-slate-500 mb-4">
           {wordCount(set.text)} words &middot; {set.gaps.length} gap
           {set.gaps.length === 1 ? "" : "s"} &middot; {set.comprehension.length} question
           {set.comprehension.length === 1 ? "" : "s"}
         </p>
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {MIXGAP_ACTIVITIES.map((a) => {
             const blocked = unavailableReason(a, set);
             const card = (
               <div
-                className={`h-full rounded-xl p-5 border ${
+                className={`h-full rounded-xl p-4 border ${
                   blocked
                     ? "bg-slate-50 border-slate-200 opacity-60 cursor-not-allowed"
                     : "bg-white border-slate-200 hover:border-cga-400 hover:shadow"

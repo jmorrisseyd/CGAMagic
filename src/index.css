@@ -64,6 +64,12 @@ body {
     background: #fff !important;
   }
 
+  /* Games enlarge the root font to fill the screen; paper gets the normal
+     size. !important is what beats the inline style the game sets. */
+  html {
+    font-size: 16px !important;
+  }
+
   .no-print {
     display: none !important;
   }

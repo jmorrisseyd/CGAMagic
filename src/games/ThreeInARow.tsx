@@ -173,8 +173,11 @@ export function ThreeInARow({ set }: { set: PlayableSet }) {
       </div>
 
       {active && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl p-6 flex flex-col items-center gap-5 max-w-md w-full">
+        // The overlay scrolls, and m-auto rather than flex centring keeps the
+        // top reachable, in case a long prompt or a picture makes the
+        // question taller than the screen.
+        <div className="fixed inset-0 bg-black/40 flex p-4 overflow-y-auto">
+          <div className="m-auto bg-white rounded-xl shadow-xl p-6 flex flex-col items-center gap-5 max-w-md w-full">
             <div className="text-sm text-slate-500">Team {turn}, answer:</div>
             <div className="text-2xl font-bold text-center">
               <SideView side={cellPairs[active.cell].left} imageClassName="max-h-40" />

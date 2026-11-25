@@ -7,6 +7,10 @@ import { GameShell } from "./GameShell";
 
 const MAX_WORDS = 16;
 const MAX_WRONG = 6;
+/** Width of one letter slot in the word, in em, including its spacing. */
+const SLOT_EM = 1.1;
+/** Width of the gap between words in a phrase, in em. */
+const GAP_EM = 0.8;
 /**
  * Any Unicode letter is guessable. A hard-coded accent list used to miss
  * the Spanish acutes (á í ó ú) and ß/œ, which meant those characters were
@@ -39,7 +43,26 @@ export function Hangman({ set }: { set: PlayableSet }) {
   const [finished, setFinished] = useState(false);
 
   const current = items[index];
-  const secret = sideText(direction === "leftToRight" ? current.right : current.left);
+  // NFC so an accent typed as a separate combining mark still forms one
+  // guessable letter, and any run of whitespace (incl. non-breaking spaces)
+  // becomes a single plain space, so it shows as a gap, not a hidden letter.
+  const secret = sideText(direction === "leftToRight" ? current.right : current.left)
+    .normalize("NFC")
+    .replace(/\s+/gu, " ")
+    .trim();
+  /** The secret split into words, each a list of characters with its position. */
+  const secretWords = secret
+    .split(" ")
+    .reduce<{ ch: string; at: number }[][]>((acc, word) => {
+      const offset = acc.reduce((n, w) => n + w.length + 1, 0);
+      acc.push([...word].map((ch, i) => ({ ch, at: offset + i })));
+      return acc;
+    }, []);
+  /** How wide the whole word or phrase is, in em, with a little slack. */
+  const secretEm =
+    secretWords.reduce((n, w) => n + w.length, 0) * SLOT_EM +
+    (secretWords.length - 1) * GAP_EM +
+    0.5;
   const guessLabel = direction === "leftToRight" ? set.rightLabel : set.leftLabel;
   const secretLetters = new Set(
     secret.toLowerCase().split("").filter((c) => LETTER.test(c)),
@@ -134,7 +157,7 @@ export function Hangman({ set }: { set: PlayableSet }) {
         </div>
       }
     >
-      <div className="flex flex-col items-center gap-6 w-full max-w-lg">
+      <div className="flex flex-col items-center gap-6 w-full max-w-4xl">
         {allDone ? (
           <div className="text-center flex flex-col items-center gap-4">
             <div className="text-3xl font-bold">All words done! 🎉</div>
@@ -164,74 +187,101 @@ export function Hangman({ set }: { set: PlayableSet }) {
             <div className="text-sm text-slate-500">
               Word {index + 1} of {items.length}
             </div>
-            <HangmanDrawing wrong={wrong} />
-            <div className="text-3xl font-mono tracking-widest">
-              {secret.split("").map((ch, i) => {
-                const lower = ch.toLowerCase();
-                const isLetter = LETTER.test(lower);
-                const show = !isLetter || guessed.has(lower) || roundOver;
-                return (
-                  <span key={i} className="inline-block w-8 text-center border-b-4 border-slate-400 mx-0.5">
-                    {show ? ch : " "}
+            {/* One line, however long the word or phrase: the letter size is
+                the width available divided by the number of characters, up
+                to a comfortable maximum. The floor is low (ordinary reading
+                size once the game is scaled to the screen) so that realistic
+                phrases never wrap; only an extreme one would, and then only
+                between words, never inside one. */}
+            <div className="@container w-full">
+              <div
+                className="flex flex-wrap justify-center font-mono"
+                style={{
+                  fontSize: `clamp(0.5rem, calc(100cqw / ${secretEm}), 2.25rem)`,
+                  columnGap: `${GAP_EM}em`,
+                  rowGap: "0.4em",
+                }}
+              >
+                {secretWords.map((word, w) => (
+                  <span key={w} className="flex flex-nowrap">
+                    {word.map(({ ch, at }) => {
+                      const lower = ch.toLowerCase();
+                      const isLetter = LETTER.test(lower);
+                      const show = !isLetter || guessed.has(lower) || roundOver;
+                      return (
+                        <span
+                          key={at}
+                          className="shrink-0 text-center border-b-[0.12em] border-slate-400 leading-tight"
+                          style={{ width: `${SLOT_EM - 0.15}em`, marginInline: "0.075em" }}
+                        >
+                          {show ? ch : "\u00a0"}
+                        </span>
+                      );
+                    })}
                   </span>
-                );
-              })}
+                ))}
+              </div>
             </div>
 
-            {roundOver ? (
-              <div className="flex flex-col items-center gap-3">
-                <div className={`text-xl font-bold ${won ? "text-leaf-700" : "text-red-700"}`}>
-                  {won ? "Saved! 🎉" : `Hanged! The word was "${secret}"`}
+            {/* The drawing sits beside the keyboard rather than above it,
+                so the whole game fits a classroom screen at a larger size. */}
+            <div className="flex flex-col md:flex-row items-center justify-center gap-8">
+              <HangmanDrawing wrong={wrong} />
+              {roundOver ? (
+                <div className="flex flex-col items-center gap-3">
+                  <div className={`text-xl font-bold ${won ? "text-leaf-700" : "text-red-700"}`}>
+                    {won ? "Saved! 🎉" : `Hanged! The word was "${secret}"`}
+                  </div>
+                  <button
+                    onClick={nextWord}
+                    className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
+                  >
+                    {isLastWord ? "See results →" : "Next word →"}
+                  </button>
                 </div>
-                <button
-                  onClick={nextWord}
-                  className="rounded-lg bg-cga-600 hover:bg-cga-700 text-white font-semibold px-6 py-3"
-                >
-                  {isLastWord ? "See results →" : "Next word →"}
-                </button>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-3">
-                <p className="text-xs text-slate-400">
-                  Type on your keyboard, or tap the keys below
-                </p>
-                {/* QWERTY, staggered like a real keyboard, so students can
-                    find letters by muscle memory rather than reading. */}
-                <div className="flex flex-col items-center gap-1">
-                  {QWERTY_ROWS.map((row, r) => (
-                    <div
-                      key={r}
-                      className="flex gap-1 justify-center"
-                      style={{ paddingLeft: `${r * 1.1}rem` }}
-                    >
-                      {row.split("").map((l) => (
+              ) : (
+                <div className="flex flex-col items-center gap-3">
+                  <p className="text-xs text-slate-400">
+                    Type on your keyboard, or tap the keys below
+                  </p>
+                  {/* QWERTY, staggered like a real keyboard, so students can
+                      find letters by muscle memory rather than reading. */}
+                  <div className="flex flex-col items-center gap-1">
+                    {QWERTY_ROWS.map((row, r) => (
+                      <div
+                        key={r}
+                        className="flex gap-1 justify-center"
+                        style={{ paddingLeft: `${r * 1.1}rem` }}
+                      >
+                        {row.split("").map((l) => (
+                          <LetterButton
+                            key={l}
+                            letter={l}
+                            guessed={guessed}
+                            onGuess={guess}
+                            secretLetters={secretLetters}
+                          />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                  {accentedKeys.length > 0 && (
+                    <div className="flex flex-wrap gap-1 justify-center max-w-md border-t border-slate-200 pt-3">
+                      {accentedKeys.map((l) => (
                         <LetterButton
                           key={l}
                           letter={l}
                           guessed={guessed}
                           onGuess={guess}
                           secretLetters={secretLetters}
+                          uppercase={false}
                         />
                       ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-                {accentedKeys.length > 0 && (
-                  <div className="flex flex-wrap gap-1 justify-center max-w-md border-t border-slate-200 pt-3">
-                    {accentedKeys.map((l) => (
-                      <LetterButton
-                        key={l}
-                        letter={l}
-                        guessed={guessed}
-                        onGuess={guess}
-                        secretLetters={secretLetters}
-                        uppercase={false}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+              )}
+            </div>
           </>
         )}
       </div>
@@ -274,7 +324,7 @@ function LetterButton({
 
 function HangmanDrawing({ wrong }: { wrong: number }) {
   return (
-    <svg width="140" height="150" viewBox="0 0 140 150" className="text-slate-700">
+    <svg viewBox="0 0 140 150" className="w-[8.75rem] h-[9.375rem] text-slate-700">
       <line x1="10" y1="140" x2="90" y2="140" stroke="currentColor" strokeWidth="4" />
       <line x1="30" y1="140" x2="30" y2="10" stroke="currentColor" strokeWidth="4" />
       <line x1="30" y1="10" x2="90" y2="10" stroke="currentColor" strokeWidth="4" />

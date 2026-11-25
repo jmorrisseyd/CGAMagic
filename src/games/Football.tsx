@@ -122,7 +122,7 @@ export function Football({ set }: { set: PlayableSet }) {
           <div className="absolute inset-y-0 left-1/2 w-0.5 bg-white/40" />
           <div
             className="absolute w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-xl transition-all duration-500"
-            style={{ left: `calc(${(ball / PITCH) * 100}% - 20px)` }}
+            style={{ left: `calc(${(ball / PITCH) * 100}% - 1.25rem)` }}
           >
             ⚽
           </div>

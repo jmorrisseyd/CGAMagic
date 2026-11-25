@@ -29,6 +29,7 @@ export function AgainstTheClock({ set }: { set: PlayableSet }) {
   const timerRef = useRef<number | null>(null);
 
   const totalTime = items.length * SECONDS_PER_ITEM;
+  const columnClass = items.length > 8 ? "grid-cols-2" : "grid-cols-1";
 
   function newGame() {
     const chosen = sample(set.pairs, Math.min(MAX_ITEMS, set.pairs.length));
@@ -124,8 +125,10 @@ export function AgainstTheClock({ set }: { set: PlayableSet }) {
             </button>
           </div>
         ) : (
+          // A longer set splits each side into two columns, so sixteen
+          // pairs fit on screen instead of running far down the page.
           <div className="grid grid-cols-2 gap-x-12 gap-y-3">
-            <div className="flex flex-col gap-3">
+            <div className={`grid gap-3 ${columnClass}`}>
               {items.map((p) => (
                 <button
                   key={p.id}
@@ -145,7 +148,7 @@ export function AgainstTheClock({ set }: { set: PlayableSet }) {
                 </button>
               ))}
             </div>
-            <div className="flex flex-col gap-3">
+            <div className={`grid gap-3 ${columnClass}`}>
               {rightOrder.map((p) => (
                 <button
                   key={p.id}
